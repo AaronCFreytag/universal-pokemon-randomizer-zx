@@ -66,10 +66,15 @@ public class Randomizer {
     public int randomize(final String filename, final PrintStream log) {
         long seed = RandomSource.pickSeed();
         // long seed = 123456789;    // TESTING
-        return randomize(filename, log, seed);
+        return randomize(filename, log, null, seed);
     }
 
     public int randomize(final String filename, final PrintStream log, long seed) {
+        return randomize(filename, log, null, seed);
+    }
+
+
+    public int randomize(final String filename, final PrintStream log, final PrintStream showdownLog, long seed) {
         final long startTime = System.currentTimeMillis();
         // long seed2 = 123456789;    // TESTING
         // RandomSource.seed(seed2);    // TESTING
@@ -635,6 +640,9 @@ public class Randomizer {
         log.println("RNG Calls: " + RandomSource.callsSinceSeed());
         log.println("------------------------------------------------------------------");
 
+        // Output showdown files
+        writeShowdownLog(showdownLog, romHandler);
+
         return checkValue;
     }
 
@@ -1058,6 +1066,40 @@ public class Randomizer {
         log.println();
     }
 
+    private void writeShowdownLog(final PrintStream log, final RomHandler romHandler) {
+        List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
+        log.println("export const Pokedex: {[k: string]: ModdedSpeciesData} = {");
+        for (Pokemon pk : allPokes) {
+            if (pk != null && !pk.actuallyCosmetic) {
+                log.println("  " + ShowdownOutputUtil.getShowdownName(pk) + ": {");
+                log.println("    inherit: true,");
+                if (pk.secondaryType != null) {
+                    log.println("    types: ['" + ShowdownOutputUtil.getShowdownTypeName(pk.primaryType)
+                            + "', '" + ShowdownOutputUtil.getShowdownTypeName(pk.secondaryType) + "'],");
+                }
+                else {
+                    log.println("    types: ['" + ShowdownOutputUtil.getShowdownTypeName(pk.primaryType) + "'],");
+                }
+                int spAtk = pk.spatk;
+                int spDef = pk.spdef;
+                if (romHandler instanceof Gen1RomHandler) {
+                    spAtk = pk.special;
+                    spDef = pk.special;
+                }
+                log.println("    baseStats: {"
+                        + "hp: " + pk.hp
+                        + ", atk: " + pk.attack
+                        + ", def: " + pk.defense
+                        + ", spa: " + spAtk
+                        + ", spd: " + spDef
+                        + ", spe: " + pk.speed
+                        + "},"
+                );
+                log.println("  },");
+            }
+        }
+        log.println("};");
+    }
     
     private static int addToCV(int checkValue, int... values) {
         for (int value : values) {

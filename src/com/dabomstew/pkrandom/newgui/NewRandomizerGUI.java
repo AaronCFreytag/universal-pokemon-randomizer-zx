@@ -837,6 +837,7 @@ public class NewRandomizerGUI {
         final boolean raceMode = settings.isRaceMode();
         // Setup verbose log
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ByteArrayOutputStream showdownBaos = new ByteArrayOutputStream();
         PrintStream log;
         try {
             log = new PrintStream(baos, false, "UTF-8");
@@ -844,7 +845,15 @@ public class NewRandomizerGUI {
             log = new PrintStream(baos);
         }
 
+        PrintStream showdownLog;
+        try {
+            showdownLog = new PrintStream(showdownBaos, false, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            showdownLog = new PrintStream(showdownBaos);
+        }
+
         final PrintStream verboseLog = log;
+        final PrintStream verboseShowdownLog = showdownLog;
 
         try {
             final AtomicInteger finishedCV = new AtomicInteger(0);
@@ -855,7 +864,7 @@ public class NewRandomizerGUI {
                 try {
                     romHandler.setLog(verboseLog);
                     finishedCV.set(new Randomizer(settings, romHandler, saveAsDirectory).randomize(filename,
-                            verboseLog, seed));
+                            verboseLog, verboseShowdownLog, seed));
                     succeededSave = true;
                 } catch (RandomizationException ex) {
                     attemptToLogException(ex, "GUI.saveFailedMessage",
@@ -863,10 +872,16 @@ public class NewRandomizerGUI {
                     if (verboseLog != null) {
                         verboseLog.close();
                     }
+                    if (verboseShowdownLog != null) {
+                        verboseShowdownLog.close();
+                    }
                 } catch (Exception ex) {
                     attemptToLogException(ex, "GUI.saveFailedIO", "GUI.saveFailedIONoLog", settings.toString(), Long.toString(seed));
                     if (verboseLog != null) {
                         verboseLog.close();
+                    }
+                    if (verboseShowdownLog != null) {
+                        verboseShowdownLog.close();
                     }
                 }
                 if (succeededSave) {
@@ -874,15 +889,22 @@ public class NewRandomizerGUI {
                         opDialog.setVisible(false);
                         // Log?
                         verboseLog.close();
+                        verboseShowdownLog.close();
                         byte[] out = baos.toByteArray();
+                        byte[] showdownOut = showdownBaos.toByteArray();
 
                         if (raceMode) {
                             JOptionPane.showMessageDialog(frame,
                                     String.format(bundle.getString("GUI.raceModeCheckValuePopup"),
                                             finishedCV.get()));
                         } else {
-                            int response = JOptionPane.showConfirmDialog(frame,
+                            JCheckBox showdownCheckbox = new JCheckBox(bundle.getString("GUI.saveLogDialog.showdownCheck"));
+                            Object[] responseText = {
                                     bundle.getString("GUI.saveLogDialog.text"),
+                                    showdownCheckbox
+                            };
+                            int response = JOptionPane.showConfirmDialog(frame,
+                                    responseText,
                                     bundle.getString("GUI.saveLogDialog.title"),
                                     JOptionPane.YES_NO_OPTION);
                             if (response == JOptionPane.YES_OPTION) {
@@ -897,6 +919,17 @@ public class NewRandomizerGUI {
                                     JOptionPane.showMessageDialog(frame,
                                             bundle.getString("GUI.logSaveFailed"));
                                     return;
+                                }
+                                if (showdownCheckbox.isSelected()) {
+                                    try {
+                                        FileOutputStream fos = new FileOutputStream(filename + "-pokedex.ts");
+                                        fos.write(showdownOut);
+                                        fos.close();
+                                    } catch (IOException e) {
+                                        JOptionPane.showMessageDialog(frame,
+                                                bundle.getString("GUI.showdownSaveFailed"));
+                                        return;
+                                    }
                                 }
                                 JOptionPane.showMessageDialog(frame,
                                         String.format(bundle.getString("GUI.logSaved"), filename));
