@@ -60,6 +60,7 @@ public class Settings {
 
     private boolean changeImpossibleEvolutions;
     private boolean makeEvolutionsEasier;
+    private boolean removeTimeBasedEvolutions;
     private boolean raceMode;
     private boolean blockBrokenMoves;
     private boolean limitPokemon;
@@ -342,7 +343,7 @@ public class Settings {
 
         // 0: general options #1 + trainer/class names
         out.write(makeByteSelected(changeImpossibleEvolutions, updateMoves, updateMovesLegacy, randomizeTrainerNames,
-                randomizeTrainerClassNames, makeEvolutionsEasier));
+                randomizeTrainerClassNames, makeEvolutionsEasier, removeTimeBasedEvolutions));
 
         // 1: pokemon base stats & abilities
         out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM,
@@ -574,6 +575,7 @@ public class Settings {
         settings.setRandomizeTrainerNames(restoreState(data[0], 3));
         settings.setRandomizeTrainerClassNames(restoreState(data[0], 4));
         settings.setMakeEvolutionsEasier(restoreState(data[0], 5));
+        settings.setRemoveTimeBasedEvolutions(restoreState(data[0], 6));
 
         settings.setBaseStatisticsMod(restoreEnum(BaseStatisticsMod.class, data[1], 3, // UNCHANGED
                 2, // SHUFFLE
@@ -1020,6 +1022,14 @@ public class Settings {
 
     public void setMakeEvolutionsEasier(boolean makeEvolutionsEasier) {
         this.makeEvolutionsEasier = makeEvolutionsEasier;
+    }
+
+    public boolean isRemoveTimeBasedEvolutions() {
+        return removeTimeBasedEvolutions;
+    }
+
+    public void setRemoveTimeBasedEvolutions(boolean removeTimeBasedEvolutions) {
+        this.removeTimeBasedEvolutions = removeTimeBasedEvolutions;
     }
 
     public boolean isEvosAllowAltFormes() {
