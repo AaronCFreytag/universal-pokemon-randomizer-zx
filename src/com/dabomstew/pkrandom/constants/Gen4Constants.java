@@ -73,7 +73,7 @@ public class Gen4Constants {
     public static final int dpStarterStringIndex = 19, ptStarterStringIndex = 36;
 
     public static final int chikoritaIndex = 152, cyndaquilIndex = 155, totodileIndex = 158, turtwigIndex = 387,
-            chimcharIndex = 390, piplupIndex = 393, slowpokeIndex = 79;
+            chimcharIndex = 390, piplupIndex = 393, slowpokeIndex = 79, eeveeIndex = 133;
 
     public static final int fossilCount = 7;
 
@@ -90,7 +90,7 @@ public class Gen4Constants {
 
     public static final int evolutionMethodCount = 26;
 
-    public static final int waterStoneIndex = 84, leafStoneIndex = 85, dawnStoneIndex = 109;
+    public static final int sunStoneIndex = 80, moonStoneIndex = 81, waterStoneIndex = 84, leafStoneIndex = 85, dawnStoneIndex = 109;
 
     public static final int highestAbilityIndex = 123;
 
@@ -333,6 +333,8 @@ public class Gen4Constants {
 
     public static final String feebasLevelPrefixDPPt = "019813B0F0BD", honeyTreeLevelPrefixDPPt = "F0BDF0B589B0051C0C1C";
 
+    private static final String runningShoesCheckPrefixDPPt = "281C0C24", runningShoesCheckPrefixHGSS = "301C0C24";
+
     private static final int trophyGardenGrassEncounterIndexDP = 304, trophyGardenGrassEncounterIndexPt = 308;
     private static final List<Integer> marshGrassEncounterIndicesDP = Arrays.asList(76, 82, 88, 94, 100, 102),
             marshGrassEncounterIndicesPt = Arrays.asList(76, 82, 88, 94, 100, 106);
@@ -490,6 +492,14 @@ public class Gen4Constants {
             return doubleBattleFixPrefixPt;
         } else {
             return doubleBattleFixPrefixHGSS;
+        }
+    }
+
+    public static String getRunWithoutRunningShoesPrefix(int romType) {
+        if (romType == Gen4Constants.Type_DP || romType == Gen4Constants.Type_Plat) {
+            return runningShoesCheckPrefixDPPt;
+        } else {
+            return runningShoesCheckPrefixHGSS;
         }
     }
 

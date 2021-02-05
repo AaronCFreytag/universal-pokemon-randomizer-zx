@@ -2391,6 +2391,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public void removeTimeBasedEvolutions() {
+        log("--Removing Timed-Based Evolutions--");
+        for (Pokemon pkmn : pokes) {
+            if (pkmn != null) {
+                for (Evolution evol : pkmn.evolutionsFrom) {
+                    // In Gen 3, only Eevee has a time-based evolution.
+                    if (evol.type == EvolutionType.HAPPINESS_DAY) {
+                        // Eevee: Make sun stone => Espeon
+                        evol.type = EvolutionType.STONE;
+                        evol.extraInfo = Gen3Constants.sunStoneIndex;
+                        logEvoChangeStone(evol.from.name, evol.to.name, itemNames[Gen3Constants.sunStoneIndex]);
+                    } else if (evol.type == EvolutionType.HAPPINESS_NIGHT) {
+                        // Eevee: Make moon stone => Umbreon
+                        evol.type = EvolutionType.STONE;
+                        evol.extraInfo = Gen3Constants.moonStoneIndex;
+                        logEvoChangeStone(evol.from.name, evol.to.name, itemNames[Gen3Constants.moonStoneIndex]);
+                    }
+                }
+            }
+        }
+        logBlankLine();
+    }
+
+    @Override
     public boolean hasShopRandomization() {
         return false;
     }
@@ -3082,6 +3106,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             available |= MiscTweak.RANDOMIZE_PC_POTION.getValue();
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
+        available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
         return available;
     }
 
@@ -3102,6 +3127,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             nonBadItems.banSingles(Gen3Constants.luckyEggIndex);
         } else if (tweak == MiscTweak.RANDOMIZE_PC_POTION) {
             randomizePCPotion();
+        } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
+            applyRunWithoutRunningShoesPatch();
         }
     }
 
@@ -3182,6 +3209,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void randomizePCPotion() {
         if (romEntry.getValue("PCPotionOffset") != 0) {
             writeWord(romEntry.getValue("PCPotionOffset"), this.getNonBadItems().randomNonTM(this.random));
+        }
+    }
+
+    private void applyRunWithoutRunningShoesPatch() {
+        String prefix = Gen3Constants.getRunningShoesCheckPrefix(romEntry.romType);
+        int offset = find(prefix);
+        if (offset != 0) {
+            // The prefix starts 0x12 bytes from what we want to patch because what comes
+            // between is region and revision dependent. To start running, the game checks:
+            // 1. That you're not underwater (RSE only)
+            // 2. That you're holding the B button
+            // 3. That the FLAG_SYS_B_DASH flag is set (aka, you've acquired Running Shoes)
+            // 4. That you're allowed to run in this location
+            // For #3, if the flag is unset, it jumps to a different part of the
+            // code to make you walk instead. This simply nops out this jump so the
+            // game stops caring about the FLAG_SYS_B_DASH flag entirely.
+            writeWord(offset + 0x12, 0);
         }
     }
 

@@ -64,6 +64,9 @@ public class Gen3Constants {
 
     public static final String rsPokemonPalettesPointerSuffix = "080C064A11404840";
 
+    private static final String runningShoesCheckPrefixRS = "0440002C1DD08620", runningShoesCheckPrefixFRLG = "02200540002D29D0",
+            runningShoesCheckPrefixE = "0640002E1BD08C20";
+
     public static final int efrlgPokemonNamesPointer = 0x144, efrlgMoveNamesPointer = 0x148,
             efrlgAbilityNamesPointer = 0x1C0, efrlgItemDataPointer = 0x1C8, efrlgMoveDataPointer = 0x1CC,
             efrlgPokemonStatsPointer = 0x1BC, efrlgFrontSpritesPointer = 0x128, efrlgPokemonPalettesPointer = 0x130;
@@ -266,6 +269,16 @@ public class Gen3Constants {
     }
 
     public static ItemList allowedItems, nonBadItems;
+
+    public static String getRunningShoesCheckPrefix(int romType) {
+        if (romType == Gen3Constants.RomType_Ruby || romType == Gen3Constants.RomType_Sapp) {
+            return runningShoesCheckPrefixRS;
+        } else if (romType == Gen3Constants.RomType_FRLG) {
+            return runningShoesCheckPrefixFRLG;
+        } else {
+            return runningShoesCheckPrefixE;
+        }
+    }
 
     static {
         setupAllowedItems();
