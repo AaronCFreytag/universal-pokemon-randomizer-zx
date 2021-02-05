@@ -41,8 +41,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryPoolMXBean;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -52,9 +50,6 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static com.dabomstew.pkrandom.pokemon.ExpCurve.MEDIUM_FAST;
-import static com.dabomstew.pkrandom.pokemon.ExpCurve.MEDIUM_SLOW;
 
 public class NewRandomizerGUI {
     private JTabbedPane tabbedPane1;
@@ -278,6 +273,7 @@ public class NewRandomizerGUI {
     private JCheckBox miscBalanceStaticLevelsCheckBox;
     private JCheckBox miscRetainAltFormesCheckBox;
     private JComboBox pbsEXPCurveComboBox;
+    private JCheckBox paRetainNumberOfAbilitiesCheckBox;
 
     private static JFrame frame;
 
@@ -1300,6 +1296,7 @@ public class NewRandomizerGUI {
         paBadAbilitiesCheckBox.setSelected(settings.isBanBadAbilities());
         paFollowMegaEvosCheckBox.setSelected(settings.isAbilitiesFollowMegaEvolutions());
         paWeighDuplicatesTogetherCheckBox.setSelected(settings.isWeighDuplicateAbilitiesTogether());
+        paRetainNumberOfAbilitiesCheckBox.setSelected(settings.isRetainNumberOfAbilities());
 
         ptRandomFollowEvolutionsRadioButton.setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_FOLLOW_EVOLUTIONS);
         ptRandomCompletelyRadioButton.setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
@@ -1525,6 +1522,7 @@ public class NewRandomizerGUI {
         settings.setBanBadAbilities(paBadAbilitiesCheckBox.isSelected());
         settings.setAbilitiesFollowMegaEvolutions(paFollowMegaEvosCheckBox.isSelected());
         settings.setWeighDuplicateAbilitiesTogether(paWeighDuplicatesTogetherCheckBox.isSelected());
+        settings.setRetainNumberOfAbilities(paRetainNumberOfAbilitiesCheckBox.isSelected());
 
         settings.setTypesMod(ptUnchangedRadioButton.isSelected(), ptRandomFollowEvolutionsRadioButton.isSelected(),
                 ptRandomCompletelyRadioButton.isSelected());
@@ -1866,6 +1864,9 @@ public class NewRandomizerGUI {
         paWeighDuplicatesTogetherCheckBox.setVisible(true);
         paWeighDuplicatesTogetherCheckBox.setEnabled(false);
         paWeighDuplicatesTogetherCheckBox.setSelected(false);
+        paRetainNumberOfAbilitiesCheckBox.setVisible(true);
+        paRetainNumberOfAbilitiesCheckBox.setEnabled(false);
+        paRetainNumberOfAbilitiesCheckBox.setSelected(false);
         peUnchangedRadioButton.setVisible(true);
         peUnchangedRadioButton.setEnabled(false);
         peUnchangedRadioButton.setSelected(false);
@@ -2427,6 +2428,7 @@ public class NewRandomizerGUI {
                 paBadAbilitiesCheckBox.setEnabled(false);
                 paFollowMegaEvosCheckBox.setVisible(romHandler.hasMegaEvolutions());
                 paWeighDuplicatesTogetherCheckBox.setEnabled(false);
+                paRetainNumberOfAbilitiesCheckBox.setEnabled(false);
             } else {
                 pokemonAbilitiesPanel.setVisible(false);
             }
@@ -2762,6 +2764,7 @@ public class NewRandomizerGUI {
             paBadAbilitiesCheckBox.setEnabled(true);
             paFollowMegaEvosCheckBox.setEnabled(true);
             paWeighDuplicatesTogetherCheckBox.setEnabled(true);
+            paRetainNumberOfAbilitiesCheckBox.setEnabled(true);
         } else {
             paAllowWonderGuardCheckBox.setEnabled(false);
             paAllowWonderGuardCheckBox.setSelected(false);
@@ -2777,6 +2780,8 @@ public class NewRandomizerGUI {
             paFollowMegaEvosCheckBox.setSelected(false);
             paWeighDuplicatesTogetherCheckBox.setEnabled(false);
             paWeighDuplicatesTogetherCheckBox.setSelected(false);
+            paRetainNumberOfAbilitiesCheckBox.setEnabled(false);
+            paRetainNumberOfAbilitiesCheckBox.setSelected(false);
         }
 
         if (peRandomRadioButton.isSelected()) {

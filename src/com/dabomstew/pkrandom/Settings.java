@@ -93,6 +93,7 @@ public class Settings {
     private boolean banNegativeAbilities;
     private boolean banBadAbilities;
     private boolean weighDuplicateAbilitiesTogether;
+    private boolean retainNumberOfAbilities;
 
     public enum StartersMod {
         UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
@@ -1193,6 +1194,13 @@ public class Settings {
 
     public void setWeighDuplicateAbilitiesTogether(boolean weighDuplicateAbilitiesTogether) {
         this.weighDuplicateAbilitiesTogether = weighDuplicateAbilitiesTogether;
+    }
+    public boolean isRetainNumberOfAbilities() {
+        return retainNumberOfAbilities;
+    }
+
+    public void setRetainNumberOfAbilities(boolean retainNumberOfAbilities) {
+        this.retainNumberOfAbilities = retainNumberOfAbilities;
     }
 
     public StartersMod getStartersMod() {

@@ -584,7 +584,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
                                    boolean banNegativeAbilities, boolean banBadAbilities, boolean megaEvolutionSanity,
-                                   boolean weighDuplicatesTogether) {
+                                   boolean weighDuplicatesTogether, boolean retainNumberOfAbilities) {
         // Abilities don't exist in some games...
         if (this.abilitiesPerPokemon() == 0) {
             return;
@@ -628,10 +628,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX
                         && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX) {
                     // Pick first ability
+                    int oldAbility1 = pk.ability1;
                     pk.ability1 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether);
 
                     // Second ability?
-                    if (AbstractRomHandler.this.random.nextDouble() < 0.5) {
+                    if (retainNumberOfAbilities ? (pk.ability2 != 0 && pk.ability2 != oldAbility1)
+                            : AbstractRomHandler.this.random.nextDouble() < 0.5) {
                         // Yes, second ability
                         pk.ability2 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
                                 pk.ability1);
@@ -667,10 +669,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX
                         && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX) {
                     // Pick first ability
+                    int oldAbility1 = pk.ability1;
                     pk.ability1 = this.pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether);
 
                     // Second ability?
-                    if (this.random.nextDouble() < 0.5) {
+                    if (retainNumberOfAbilities ? (pk.ability2 != 0 && pk.ability2 != oldAbility1)
+                            : this.random.nextDouble() < 0.5) {
                         // Yes, second ability
                         pk.ability2 = this.pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
                                 pk.ability1);
