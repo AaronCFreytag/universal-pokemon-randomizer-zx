@@ -40,13 +40,17 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 public class RomFunctions {
 
     public static Set<Pokemon> getBasicOrNoCopyPokemon(RomHandler baseRom) {
+        return getBasicOrNoCopyPokemon(baseRom, true);
+    }
+
+    public static Set<Pokemon> getBasicOrNoCopyPokemon(RomHandler baseRom, boolean excludeNonStatCarryingPokes) {
         List<Pokemon> allPokes = baseRom.getPokemonInclFormes();
         Set<Pokemon> dontCopyPokes = new TreeSet<>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() < 1) {
                     dontCopyPokes.add(pkmn);
-                } else {
+                } else if (excludeNonStatCarryingPokes) {
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
                     if (!onlyEvo.carryStats) {
                         dontCopyPokes.add(pkmn);

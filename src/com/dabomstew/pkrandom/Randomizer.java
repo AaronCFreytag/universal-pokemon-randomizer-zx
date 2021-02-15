@@ -500,10 +500,10 @@ public class Randomizer {
         // TM/HM compatibility
         switch (settings.getTmsHmsCompatibilityMod()) {
         case RANDOM_PREFER_TYPE:
-            romHandler.randomizeTMHMCompatibility(true);
+            romHandler.randomizeTMHMCompatibility(true, settings.isTmsEvolutionSanity());
             break;
         case COMPLETELY_RANDOM:
-            romHandler.randomizeTMHMCompatibility(false);
+            romHandler.randomizeTMHMCompatibility(false, settings.isTmsEvolutionSanity());
             break;
         case FULL:
             romHandler.fullTMHMCompatibility();
@@ -518,6 +518,10 @@ public class Randomizer {
 
         if (settings.isFullHMCompat()) {
             romHandler.fullHMCompatibility();
+        }
+
+        if (settings.isTmsEvolutionSanity()) {
+            romHandler.ensureTMEvolutionSanity();
         }
 
         // Move Tutors (new 1.0.3)
@@ -546,10 +550,10 @@ public class Randomizer {
             // Compatibility
             switch (settings.getMoveTutorsCompatibilityMod()) {
             case RANDOM_PREFER_TYPE:
-                romHandler.randomizeMoveTutorCompatibility(true);
+                romHandler.randomizeMoveTutorCompatibility(true, settings.isTutorEvolutionSanity());
                 break;
             case COMPLETELY_RANDOM:
-                romHandler.randomizeMoveTutorCompatibility(false);
+                romHandler.randomizeMoveTutorCompatibility(false, settings.isTutorEvolutionSanity());
                 break;
             case FULL:
                 romHandler.fullMoveTutorCompatibility();
@@ -560,6 +564,10 @@ public class Randomizer {
 
             if (settings.isTutorLevelUpMoveSanity()) {
                 romHandler.ensureMoveTutorCompatSanity();
+            }
+
+            if (settings.isTutorEvolutionSanity()) {
+                romHandler.ensureMoveTutorEvolutionSanity();
             }
         }
 
