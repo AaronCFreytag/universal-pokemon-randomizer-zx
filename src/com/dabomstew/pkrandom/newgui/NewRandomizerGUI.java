@@ -276,6 +276,8 @@ public class NewRandomizerGUI {
     private JCheckBox paRetainNumberOfAbilitiesCheckBox;
     private JCheckBox miscRunWithoutRunningShoesCheckBox;
     private JCheckBox peRemoveTimeBasedEvolutionsCheckBox;
+    private JCheckBox tmFollowEvolutionsCheckBox;
+    private JCheckBox mtFollowEvolutionsCheckBox;
 
     private static JFrame frame;
 
@@ -1436,6 +1438,7 @@ public class NewRandomizerGUI {
         tmForceGoodDamagingCheckBox.setSelected(settings.isTmsForceGoodDamaging());
         tmForceGoodDamagingSlider.setValue(settings.getTmsGoodDamagingPercent());
         tmNoGameBreakingMovesCheckBox.setSelected(settings.isBlockBrokenTMMoves());
+        tmFollowEvolutionsCheckBox.setSelected(settings.isTmsEvolutionSanity());
 
         mtcRandomCompletelyRadioButton
                 .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.COMPLETELY_RANDOM);
@@ -1452,6 +1455,7 @@ public class NewRandomizerGUI {
         mtForceGoodDamagingCheckBox.setSelected(settings.isTutorsForceGoodDamaging());
         mtForceGoodDamagingSlider.setValue(settings.getTutorsGoodDamagingPercent());
         mtNoGameBreakingMovesCheckBox.setSelected(settings.isBlockBrokenTutorMoves());
+        mtFollowEvolutionsCheckBox.setSelected(settings.isTutorEvolutionSanity());
 
         igtRandomizeBothRequestedGivenRadioButton
                 .setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED);
@@ -1627,6 +1631,7 @@ public class NewRandomizerGUI {
         settings.setTmsForceGoodDamaging(tmForceGoodDamagingCheckBox.isSelected());
         settings.setTmsGoodDamagingPercent(tmForceGoodDamagingSlider.getValue());
         settings.setBlockBrokenTMMoves(tmNoGameBreakingMovesCheckBox.isSelected());
+        settings.setTmsEvolutionSanity(tmFollowEvolutionsCheckBox.isSelected());
 
         settings.setMoveTutorMovesMod(mtUnchangedRadioButton.isSelected(), mtRandomRadioButton.isSelected());
         settings.setMoveTutorsCompatibilityMod(mtcUnchangedRadioButton.isSelected(), mtcRandomPreferSameTypeRadioButton.isSelected(),
@@ -1636,6 +1641,7 @@ public class NewRandomizerGUI {
         settings.setTutorsForceGoodDamaging(mtForceGoodDamagingCheckBox.isSelected());
         settings.setTutorsGoodDamagingPercent(mtForceGoodDamagingSlider.getValue());
         settings.setBlockBrokenTutorMoves(mtNoGameBreakingMovesCheckBox.isSelected());
+        settings.setTutorEvolutionSanity(mtFollowEvolutionsCheckBox.isSelected());
 
         settings.setInGameTradesMod(igtUnchangedRadioButton.isSelected(), igtRandomizeGivenPokemonOnlyRadioButton.isSelected(), igtRandomizeBothRequestedGivenRadioButton.isSelected());
         settings.setRandomizeInGameTradesItems(igtRandomizeItemsCheckBox.isSelected());
@@ -2232,6 +2238,9 @@ public class NewRandomizerGUI {
         tmForceGoodDamagingSlider.setVisible(true);
         tmForceGoodDamagingSlider.setEnabled(false);
         tmForceGoodDamagingSlider.setValue(tmForceGoodDamagingSlider.getMinimum());
+        tmFollowEvolutionsCheckBox.setVisible(true);
+        tmFollowEvolutionsCheckBox.setEnabled(false);
+        tmFollowEvolutionsCheckBox.setSelected(false);
         thcUnchangedRadioButton.setVisible(true);
         thcUnchangedRadioButton.setEnabled(false);
         thcUnchangedRadioButton.setSelected(false);
@@ -2265,6 +2274,9 @@ public class NewRandomizerGUI {
         mtForceGoodDamagingSlider.setVisible(true);
         mtForceGoodDamagingSlider.setEnabled(false);
         mtForceGoodDamagingSlider.setValue(mtForceGoodDamagingSlider.getMinimum());
+        mtFollowEvolutionsCheckBox.setVisible(true);
+        mtFollowEvolutionsCheckBox.setEnabled(false);
+        mtFollowEvolutionsCheckBox.setSelected(false);
         mtcUnchangedRadioButton.setVisible(true);
         mtcUnchangedRadioButton.setEnabled(false);
         mtcUnchangedRadioButton.setSelected(false);
@@ -3074,6 +3086,8 @@ public class NewRandomizerGUI {
             tmForceGoodDamagingCheckBox.setSelected(false);
             tmNoGameBreakingMovesCheckBox.setEnabled(false);
             tmNoGameBreakingMovesCheckBox.setSelected(false);
+            tmFollowEvolutionsCheckBox.setEnabled(false);
+            tmFollowEvolutionsCheckBox.setSelected(false);
 
             mtLevelupMoveSanityCheckBox.setEnabled(false);
             mtLevelupMoveSanityCheckBox.setSelected(false);
@@ -3083,6 +3097,8 @@ public class NewRandomizerGUI {
             mtForceGoodDamagingCheckBox.setSelected(false);
             mtNoGameBreakingMovesCheckBox.setEnabled(false);
             mtNoGameBreakingMovesCheckBox.setSelected(false);
+            mtFollowEvolutionsCheckBox.setEnabled(false);
+            mtFollowEvolutionsCheckBox.setSelected(false);
         } else {
             tmUnchangedRadioButton.setEnabled(true);
             tmRandomRadioButton.setEnabled(true);
@@ -3093,9 +3109,12 @@ public class NewRandomizerGUI {
             if (!(pmsUnchangedRadioButton.isSelected()) || !(tmUnchangedRadioButton.isSelected())
                     || !(thcUnchangedRadioButton.isSelected())) {
                 tmLevelupMoveSanityCheckBox.setEnabled(true);
+                tmFollowEvolutionsCheckBox.setEnabled(true);
             } else {
                 tmLevelupMoveSanityCheckBox.setEnabled(false);
                 tmLevelupMoveSanityCheckBox.setSelected(false);
+                tmFollowEvolutionsCheckBox.setEnabled(false);
+                tmFollowEvolutionsCheckBox.setSelected(false);
             }
 
             if (!(tmUnchangedRadioButton.isSelected())) {
@@ -3115,9 +3134,12 @@ public class NewRandomizerGUI {
                     && (!(pmsUnchangedRadioButton.isSelected()) || !(mtUnchangedRadioButton.isSelected())
                     || !(mtcUnchangedRadioButton.isSelected()))) {
                 mtLevelupMoveSanityCheckBox.setEnabled(true);
+                mtFollowEvolutionsCheckBox.setEnabled(true);
             } else {
                 mtLevelupMoveSanityCheckBox.setEnabled(false);
                 mtLevelupMoveSanityCheckBox.setSelected(false);
+                mtFollowEvolutionsCheckBox.setEnabled(false);
+                mtFollowEvolutionsCheckBox.setSelected(false);
             }
 
             if (romHandler.hasMoveTutors() && !(mtUnchangedRadioButton.isSelected())) {

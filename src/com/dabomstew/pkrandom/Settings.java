@@ -241,6 +241,7 @@ public class Settings {
     private boolean tmsForceGoodDamaging;
     private int tmsGoodDamagingPercent = 0;
     private boolean blockBrokenTMMoves;
+    private boolean tmsEvolutionSanity;
 
     public enum TMsHMsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -258,6 +259,7 @@ public class Settings {
     private boolean tutorsForceGoodDamaging;
     private int tutorsGoodDamagingPercent = 0;
     private boolean blockBrokenTutorMoves;
+    private boolean tutorEvolutionSanity;
 
     public enum MoveTutorsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -1893,6 +1895,14 @@ public class Settings {
         this.tmsHmsCompatibilityMod = tmsHmsCompatibilityMod;
     }
 
+    public boolean isTmsEvolutionSanity() {
+        return tmsEvolutionSanity;
+    }
+
+    public void setTmsEvolutionSanity(boolean tmsEvolutionSanity) {
+        this.tmsEvolutionSanity = tmsEvolutionSanity;
+    }
+
     public MoveTutorMovesMod getMoveTutorMovesMod() {
         return moveTutorMovesMod;
     }
@@ -1955,6 +1965,14 @@ public class Settings {
 
     private void setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
         this.moveTutorsCompatibilityMod = moveTutorsCompatibilityMod;
+    }
+
+    public boolean isTutorEvolutionSanity() {
+        return tutorEvolutionSanity;
+    }
+
+    public void setTutorEvolutionSanity(boolean tutorEvolutionSanity) {
+        this.tutorEvolutionSanity = tutorEvolutionSanity;
     }
 
     public InGameTradesMod getInGameTradesMod() {
