@@ -66,7 +66,7 @@ public class Settings {
     private boolean limitPokemon;
 
     public enum BaseStatisticsMod {
-        UNCHANGED, SHUFFLE, RANDOM,
+        UNCHANGED, SHUFFLE, RANDOM, SWAP
     }
 
     public enum ExpCurveMod {

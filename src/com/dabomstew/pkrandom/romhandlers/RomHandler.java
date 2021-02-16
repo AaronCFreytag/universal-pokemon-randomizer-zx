@@ -119,6 +119,10 @@ public interface RomHandler {
     // tooltips)
     void randomizePokemonStats(boolean evolutionSanity, boolean megaEvolutionSanity);
 
+    // Swap the stats of different pokemon
+    // Returns the swaps that were made, for future use
+    Map<Pokemon, Pokemon> swapPokemonStats(boolean evolutionSanity, boolean megaEvolutionSanity);
+
     // Update base stats to gen6
     void updatePokemonStats(int generation);
 

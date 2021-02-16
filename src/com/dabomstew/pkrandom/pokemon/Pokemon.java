@@ -193,6 +193,12 @@ public class Pokemon implements Comparable<Pokemon> {
         spdef = baseForme.spdef;
     }
 
+    public boolean hasSameStatsAs(Pokemon other) {
+        return hp == other.hp && attack == other.attack
+                && defense == other.defense && speed == other.speed
+                && spatk == other.spatk && spdef == other.spdef;
+    }
+
     public void copyBaseFormeAbilities(Pokemon baseForme) {
         ability1 = baseForme.ability1;
         ability2 = baseForme.ability2;
