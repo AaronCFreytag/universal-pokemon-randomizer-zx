@@ -318,6 +318,145 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public Map<Pokemon, Pokemon> swapPokemonStats(boolean evolutionSanity, boolean megaEvolutionSanity) {
+        Map<Pokemon, Pokemon> swaps = new TreeMap<Pokemon, Pokemon>();
+        // If evolution sanity is enabled, determine evolution groups and swap those
+        if (evolutionSanity) {
+            List<Pokemon> allPokes = this.getPokemonInclFormes();
+            Map<Integer, List<Pokemon>> finalEvosByCount = new TreeMap<Integer, List<Pokemon>>();
+            Map<Integer, List<Pokemon>> legendaryFinalEvosByCount = new TreeMap<Integer, List<Pokemon>>();
+            Map<Pokemon, List<Pokemon>> formeCache = new TreeMap<Pokemon, List<Pokemon>>();
+            List<Map.Entry<Pokemon, Pokemon>> statCopies = new ArrayList<Map.Entry<Pokemon, Pokemon>>();
+            for (Pokemon pkmn : allPokes) {
+                // If fully evolved pokemon, not a cosmetic form, and not shedinja
+                if (pkmn != null && pkmn.evolutionsFrom.size() == 0 && pkmn.number != 292 && !pkmn.actuallyCosmetic) {
+                    // Skip pokemon which are formes with the same stats as their base form
+                    // Or pokemon with formes that have the same stats as another forme
+                    if (pkmn.formeNumber != 0 && pkmn.baseForme != null) {
+                        if (!formeCache.containsKey(pkmn.baseForme)) {
+                            formeCache.put(pkmn.baseForme, new ArrayList<Pokemon>());
+                        }
+                        formeCache.get(pkmn.baseForme).add(pkmn);
+                        // Otherwise if the same stats as the base forme, chain off the base forme
+                        if (pkmn.hasSameStatsAs(pkmn.baseForme)) {
+                            statCopies.add(new AbstractMap.SimpleEntry<Pokemon, Pokemon>(pkmn.baseForme, pkmn));
+                            continue;
+                        }
+                        // If there's already another forme with the same stats, chain off that one
+                        // This is mostly so that the Rotom formes are only considered one pokemon in the pool
+                        else {
+                            List<Pokemon> otherFormes = formeCache.get(pkmn.baseForme);
+                            for (Pokemon otherForme : otherFormes) {
+                                if (pkmn.hasSameStatsAs(otherForme)) {
+                                    statCopies.add(new AbstractMap.SimpleEntry<Pokemon, Pokemon>(otherForme, pkmn));
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    // Final or only evolution
+                    // Now figure out how many steps are in the evolution
+                    int evoChainSize = 0;
+                    Pokemon tmp = pkmn;
+                    while (tmp.evolutionsTo.size() > 0 && tmp.evolutionsTo.get(0).carryStats) {
+                        evoChainSize++;
+                        tmp = tmp.evolutionsTo.get(0).from;
+                    }
+
+                    // Use the legendary pool if pokemon is a legendary or an ultra beast
+                    Map<Integer, List<Pokemon>> list = finalEvosByCount;
+                    if (pkmn.isLegendary() || pkmn.isUltraBeast()) {
+                        list = legendaryFinalEvosByCount;
+                    }
+
+                    if (!list.containsKey((evoChainSize))) {
+                        list.put(evoChainSize, new ArrayList<Pokemon>());
+                    }
+                    list.get(evoChainSize).add(pkmn);
+                }
+            }
+            for (Map.Entry<Integer, List<Pokemon>> entry : finalEvosByCount.entrySet()) {
+                swaps.putAll(swapPokemonStatsInList(entry.getValue(), true));
+            }
+            for (Map.Entry<Integer, List<Pokemon>> entry : legendaryFinalEvosByCount.entrySet()) {
+                swaps.putAll(swapPokemonStatsInList(entry.getValue(), true));
+            }
+            for (Map.Entry<Pokemon, Pokemon> entry : statCopies) {
+                Pokemon pkmn = entry.getValue();
+                Pokemon pkmnToStatCopy = entry.getKey();
+                pkmn.copyBaseFormeBaseStats(pkmnToStatCopy);
+            }
+        }
+
+        // With evolution sanity disabled, just swap at complete random
+        else {
+            swaps.putAll(swapPokemonStatsInList(this.getPokemonInclFormes(), true));
+        }
+
+        List<Pokemon> allPokes = this.getPokemonInclFormes();
+        for (Pokemon pk : allPokes) {
+            if (pk != null && pk.actuallyCosmetic) {
+                pk.copyBaseFormeBaseStats(pk.baseForme);
+            }
+        }
+
+        return swaps;
+    }
+
+    private Map<Pokemon, Pokemon> swapPokemonStatsInList(List<Pokemon> list, boolean alsoDoPreevos) {
+        Map<Pokemon, Pokemon> map = new TreeMap<Pokemon, Pokemon>();
+        List<Pokemon> resultList = new ArrayList<Pokemon>(list);
+        Collections.shuffle(resultList);
+        // Cache of stats
+        // Used if the original stats have been overwritten
+        Map<Integer, List<Integer>> statsCache = new HashMap<Integer, List<Integer>>();
+        for (int i = 0; i < list.size(); i++) {
+            Pokemon pkmnToChange = list.get(i);
+            Pokemon pkmnToCopyStats = resultList.get(i);
+            while (pkmnToChange != null && pkmnToCopyStats != null) {
+                // Copy current stats to cache before overriding them
+                statsCache.put(pkmnToChange.number, List.of(
+                        pkmnToChange.hp, pkmnToChange.attack, pkmnToChange.defense,
+                        pkmnToChange.spatk, pkmnToChange.spdef, pkmnToChange.speed,
+                        pkmnToChange.special
+                ));
+
+                // Randomize stats, prioritizing cached values
+                List<Integer> statsCopyList = List.of(
+                        pkmnToCopyStats.hp, pkmnToCopyStats.attack, pkmnToCopyStats.defense,
+                        pkmnToCopyStats.spatk, pkmnToCopyStats.spdef, pkmnToCopyStats.speed,
+                        pkmnToCopyStats.special
+                );
+                if (statsCache.containsKey(pkmnToCopyStats.number)) {
+                    statsCopyList = statsCache.get(pkmnToCopyStats.number);
+                }
+                pkmnToChange.hp = statsCopyList.get(0);
+                pkmnToChange.attack = statsCopyList.get(1);
+                pkmnToChange.defense = statsCopyList.get(2);
+                pkmnToChange.spatk = statsCopyList.get(3);
+                pkmnToChange.spdef = statsCopyList.get(4);
+                pkmnToChange.speed = statsCopyList.get(5);
+                pkmnToChange.special = statsCopyList.get(6);
+
+                // Make a note in the swaps map, for bookkeeping purposes
+                map.put(pkmnToChange, pkmnToCopyStats);
+
+                // Continue down the pre-evos if necessary
+                if (alsoDoPreevos && pkmnToChange.evolutionsTo.size() > 0 && pkmnToCopyStats.evolutionsTo.size() > 0
+                        && pkmnToChange.evolutionsTo.get(0).carryStats && pkmnToCopyStats.evolutionsTo.get(0).carryStats) {
+                    pkmnToChange = pkmnToChange.evolutionsTo.get(0).from;
+                    pkmnToCopyStats = pkmnToCopyStats.evolutionsTo.get(0).from;
+                }
+                else {
+                    pkmnToChange = null;
+                    pkmnToCopyStats = null;
+                }
+            }
+        }
+        return map;
+    }
+
+    @Override
     public void updatePokemonStats(int generation) {
         List<Pokemon> pokes = getPokemonInclFormes();
 

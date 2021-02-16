@@ -217,6 +217,10 @@ public class Randomizer {
                 romHandler.randomizePokemonStats(settings.isBaseStatsFollowEvolutions(),
                         settings.isBaseStatsFollowMegaEvolutions());
                 break;
+            case SWAP:
+                romHandler.swapPokemonStats(settings.isBaseStatsFollowEvolutions(),
+                        settings.isBaseStatsFollowMegaEvolutions());
+                break;
             default:
                 break;
         }
