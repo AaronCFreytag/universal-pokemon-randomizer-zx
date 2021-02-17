@@ -365,7 +365,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     // Use the legendary pool if pokemon is a legendary or an ultra beast
                     Map<Integer, List<Pokemon>> list = finalEvosByCount;
-                    if (pkmn.isLegendary() || pkmn.isUltraBeast()) {
+                    if (pkmn.isLegendary()) {
                         list = legendaryFinalEvosByCount;
                     }
 
