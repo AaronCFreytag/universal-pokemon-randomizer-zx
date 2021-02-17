@@ -61,6 +61,8 @@ public class Settings {
     private boolean changeImpossibleEvolutions;
     private boolean makeEvolutionsEasier;
     private boolean removeTimeBasedEvolutions;
+
+    private boolean randomizeEvolutionsWithSwap;
     private boolean raceMode;
     private boolean blockBrokenMoves;
     private boolean limitPokemon;
@@ -1029,6 +1031,14 @@ public class Settings {
 
     public void setRemoveTimeBasedEvolutions(boolean removeTimeBasedEvolutions) {
         this.removeTimeBasedEvolutions = removeTimeBasedEvolutions;
+    }
+
+    public boolean isRandomizeEvolutionsWithSwap() {
+        return randomizeEvolutionsWithSwap;
+    }
+
+    public void setRandomizeEvolutionsWithSwap(boolean randomizeEvolutionsWithSwap) {
+        this.randomizeEvolutionsWithSwap = randomizeEvolutionsWithSwap;
     }
 
     public boolean isEvosAllowAltFormes() {
