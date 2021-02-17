@@ -207,6 +207,8 @@ public class Randomizer {
             log.println();
         }
 
+        Map<Pokemon, Pokemon> pokemonStatSwaps = null;
+
         // Base stats changing
         switch (settings.getBaseStatisticsMod()) {
             case SHUFFLE:
@@ -218,7 +220,7 @@ public class Randomizer {
                         settings.isBaseStatsFollowMegaEvolutions());
                 break;
             case SWAP:
-                romHandler.swapPokemonStats(settings.isBaseStatsFollowEvolutions(),
+                pokemonStatSwaps = romHandler.swapPokemonStats(settings.isBaseStatsFollowEvolutions(),
                         settings.isBaseStatsFollowMegaEvolutions());
                 break;
             default:
@@ -255,6 +257,11 @@ public class Randomizer {
         // Remove time-based evolutions
         if (settings.isRemoveTimeBasedEvolutions()) {
             romHandler.removeTimeBasedEvolutions();
+        }
+
+        // Randomize swapped evolutions
+        if (settings.isRandomizeEvolutionsWithSwap() && pokemonStatSwaps != null) {
+            romHandler.swapPokemonEvoMethods(pokemonStatSwaps);
         }
 
         // Starter Pokemon

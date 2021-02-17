@@ -325,33 +325,34 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Pokemon> allPokes = this.getPokemonInclFormes();
             Map<Integer, List<Pokemon>> finalEvosByCount = new TreeMap<Integer, List<Pokemon>>();
             Map<Integer, List<Pokemon>> legendaryFinalEvosByCount = new TreeMap<Integer, List<Pokemon>>();
-            Map<Pokemon, List<Pokemon>> formeCache = new TreeMap<Pokemon, List<Pokemon>>();
-            List<Map.Entry<Pokemon, Pokemon>> statCopies = new ArrayList<Map.Entry<Pokemon, Pokemon>>();
+            Map<Pokemon, List<Pokemon>> uniqueStatFormeCache = new TreeMap<Pokemon, List<Pokemon>>();
+            Map<Pokemon, Pokemon> statCopies = new TreeMap<Pokemon, Pokemon>();
             for (Pokemon pkmn : allPokes) {
                 // If fully evolved pokemon, not a cosmetic form, and not shedinja
                 if (pkmn != null && pkmn.evolutionsFrom.size() == 0 && pkmn.number != 292 && !pkmn.actuallyCosmetic) {
                     // Skip pokemon which are formes with the same stats as their base form
                     // Or pokemon with formes that have the same stats as another forme
                     if (pkmn.formeNumber != 0 && pkmn.baseForme != null) {
-                        if (!formeCache.containsKey(pkmn.baseForme)) {
-                            formeCache.put(pkmn.baseForme, new ArrayList<Pokemon>());
+                        if (!uniqueStatFormeCache.containsKey(pkmn.baseForme)) {
+                            uniqueStatFormeCache.put(pkmn.baseForme, new ArrayList<Pokemon>());
                         }
-                        formeCache.get(pkmn.baseForme).add(pkmn);
                         // Otherwise if the same stats as the base forme, chain off the base forme
                         if (pkmn.hasSameStatsAs(pkmn.baseForme)) {
-                            statCopies.add(new AbstractMap.SimpleEntry<Pokemon, Pokemon>(pkmn.baseForme, pkmn));
-                            continue;
+                            statCopies.put(pkmn, pkmn.baseForme);
                         }
                         // If there's already another forme with the same stats, chain off that one
                         // This is mostly so that the Rotom formes are only considered one pokemon in the pool
                         else {
-                            List<Pokemon> otherFormes = formeCache.get(pkmn.baseForme);
+                            List<Pokemon> otherFormes = uniqueStatFormeCache.get(pkmn.baseForme);
                             for (Pokemon otherForme : otherFormes) {
                                 if (pkmn.hasSameStatsAs(otherForme)) {
-                                    statCopies.add(new AbstractMap.SimpleEntry<Pokemon, Pokemon>(otherForme, pkmn));
+                                    statCopies.put(pkmn, otherForme);
                                     continue;
                                 }
                             }
+                            // This forme's stats are unique;
+                            // Add to the cache
+                            uniqueStatFormeCache.get(pkmn.baseForme).add(pkmn);
                         }
                     }
                     // Final or only evolution
@@ -365,7 +366,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     // Use the legendary pool if pokemon is a legendary or an ultra beast
                     Map<Integer, List<Pokemon>> list = finalEvosByCount;
-                    if (pkmn.isLegendary() || pkmn.isUltraBeast()) {
+                    if (pkmn.isLegendary()) {
                         list = legendaryFinalEvosByCount;
                     }
 
@@ -381,10 +382,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Map.Entry<Integer, List<Pokemon>> entry : legendaryFinalEvosByCount.entrySet()) {
                 swaps.putAll(swapPokemonStatsInList(entry.getValue(), true));
             }
-            for (Map.Entry<Pokemon, Pokemon> entry : statCopies) {
-                Pokemon pkmn = entry.getValue();
-                Pokemon pkmnToStatCopy = entry.getKey();
+            for (Map.Entry<Pokemon, Pokemon> entry : statCopies.entrySet()) {
+                Pokemon pkmn = entry.getKey();
+                Pokemon pkmnToStatCopy = entry.getValue();
                 pkmn.copyBaseFormeBaseStats(pkmnToStatCopy);
+                swaps.put(pkmn, pkmnToStatCopy);
             }
         }
 
@@ -397,6 +399,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Pokemon pk : allPokes) {
             if (pk != null && pk.actuallyCosmetic) {
                 pk.copyBaseFormeBaseStats(pk.baseForme);
+                swaps.put(pk, pk.baseForme);
             }
         }
 
@@ -404,18 +407,18 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private Map<Pokemon, Pokemon> swapPokemonStatsInList(List<Pokemon> list, boolean alsoDoPreevos) {
-        Map<Pokemon, Pokemon> map = new TreeMap<Pokemon, Pokemon>();
+        Map<Pokemon, Pokemon> pokemonSwaps = new TreeMap<Pokemon, Pokemon>();
         List<Pokemon> resultList = new ArrayList<Pokemon>(list);
         Collections.shuffle(resultList);
         // Cache of stats
         // Used if the original stats have been overwritten
-        Map<Integer, List<Integer>> statsCache = new HashMap<Integer, List<Integer>>();
+        Map<Pokemon, List<Integer>> statsCache = new HashMap<Pokemon, List<Integer>>();
         for (int i = 0; i < list.size(); i++) {
             Pokemon pkmnToChange = list.get(i);
             Pokemon pkmnToCopyStats = resultList.get(i);
             while (pkmnToChange != null && pkmnToCopyStats != null) {
                 // Copy current stats to cache before overriding them
-                statsCache.put(pkmnToChange.number, List.of(
+                statsCache.put(pkmnToChange, List.of(
                         pkmnToChange.hp, pkmnToChange.attack, pkmnToChange.defense,
                         pkmnToChange.spatk, pkmnToChange.spdef, pkmnToChange.speed,
                         pkmnToChange.special
@@ -427,8 +430,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pkmnToCopyStats.spatk, pkmnToCopyStats.spdef, pkmnToCopyStats.speed,
                         pkmnToCopyStats.special
                 );
-                if (statsCache.containsKey(pkmnToCopyStats.number)) {
-                    statsCopyList = statsCache.get(pkmnToCopyStats.number);
+                if (statsCache.containsKey(pkmnToCopyStats)) {
+                    statsCopyList = statsCache.get(pkmnToCopyStats);
                 }
                 pkmnToChange.hp = statsCopyList.get(0);
                 pkmnToChange.attack = statsCopyList.get(1);
@@ -439,7 +442,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 pkmnToChange.special = statsCopyList.get(6);
 
                 // Make a note in the swaps map, for bookkeeping purposes
-                map.put(pkmnToChange, pkmnToCopyStats);
+                pokemonSwaps.put(pkmnToChange, pkmnToCopyStats);
 
                 // Continue down the pre-evos if necessary
                 if (alsoDoPreevos && pkmnToChange.evolutionsTo.size() > 0 && pkmnToCopyStats.evolutionsTo.size() > 0
@@ -453,7 +456,57 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        return map;
+        return pokemonSwaps;
+    }
+
+    @Override
+    public void swapPokemonEvoMethods(Map<Pokemon, Pokemon> swapsToMake) {
+        Set<Evolution> changedEvos = new TreeSet<>();
+        Map<Pokemon, Evolution> evoInfoCache = new HashMap<Pokemon, Evolution>();
+        for (Map.Entry<Pokemon, Pokemon> entry : swapsToMake.entrySet()) {
+            Pokemon pkmnToChange = entry.getKey();
+            Pokemon pkmnToCopy = entry.getValue();
+            // Only copy evolution methods if both pokemon have one evolution from them
+            if (pkmnToChange.evolutionsFrom.size() == 1 && pkmnToCopy.evolutionsFrom.size() == 1) {
+                Evolution evoToChange = pkmnToChange.evolutionsFrom.get(0);
+                Evolution evoToCopy = pkmnToCopy.evolutionsFrom.get(0);
+
+                // Cache evolution info before overwriting it
+                Evolution tmpEvo = new Evolution(evoToChange.from, evoToChange.to, evoToChange.carryStats,
+                        evoToChange.type, evoToChange.extraInfo);
+                tmpEvo.level = evoToChange.level;
+                evoInfoCache.put(pkmnToChange, tmpEvo);
+
+                // Prioritize using cached info
+                if (evoInfoCache.containsKey(pkmnToCopy)) {
+                    evoToCopy = evoInfoCache.get(pkmnToCopy);
+                }
+
+                evoToChange.type = evoToCopy.type;
+                evoToChange.extraInfo = evoToCopy.extraInfo;
+                evoToChange.level = evoToCopy.level;
+
+
+                // Make sure we don't accidentally make evolution impossible via gender restrictions
+
+                if (evoToChange.type == EvolutionType.LEVEL_MALE_ONLY
+                        || evoToChange.type == EvolutionType.LEVEL_FEMALE_ONLY) {
+                    evoToChange.type = EvolutionType.LEVEL;
+                }
+                if (evoToChange.type == EvolutionType.STONE_MALE_ONLY
+                        || evoToChange.type == EvolutionType.STONE_FEMALE_ONLY) {
+                    evoToChange.type = EvolutionType.STONE;
+                }
+
+                changedEvos.add(evoToChange);
+            }
+        }
+        log("--Changed Evolution Methods--");
+        for (Evolution evol : changedEvos) {
+            log(String.format("%s now evolves into %s by method %s (%d)", evol.from.name, evol.toFullName(),
+                    evol.type, evol.extraInfo));
+        }
+        logBlankLine();
     }
 
     @Override

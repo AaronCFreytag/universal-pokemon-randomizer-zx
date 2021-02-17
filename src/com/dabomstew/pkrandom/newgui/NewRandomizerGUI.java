@@ -279,6 +279,7 @@ public class NewRandomizerGUI {
     private JCheckBox tmFollowEvolutionsCheckBox;
     private JCheckBox mtFollowEvolutionsCheckBox;
     private JRadioButton pbsSwapRadioButton;
+    private JCheckBox peRandomizeSwapEvolutionMethods;
 
     private static JFrame frame;
 
@@ -1268,6 +1269,7 @@ public class NewRandomizerGUI {
         raceModeCheckBox.setSelected(settings.isRaceMode());
 
         peChangeImpossibleEvosCheckBox.setSelected(settings.isChangeImpossibleEvolutions());
+        peRandomizeSwapEvolutionMethods.setSelected(settings.isRandomizeEvolutionsWithSwap());
         mdUpdateMovesCheckBox.setSelected(settings.isUpdateMoves());
         mdUpdateComboBox.setSelectedIndex(Math.max(0,settings.getUpdateMovesToGeneration() - (romHandler.generationOfPokemon()+1)));
         tpRandomizeTrainerNamesCheckBox.setSelected(settings.isRandomizeTrainerNames());
@@ -1507,6 +1509,7 @@ public class NewRandomizerGUI {
         settings.setRaceMode(raceModeCheckBox.isSelected());
 
         settings.setChangeImpossibleEvolutions(peChangeImpossibleEvosCheckBox.isSelected() && peChangeImpossibleEvosCheckBox.isVisible());
+        settings.setRandomizeEvolutionsWithSwap(peRandomizeSwapEvolutionMethods.isSelected());
         settings.setUpdateMoves(mdUpdateMovesCheckBox.isSelected() && mdUpdateMovesCheckBox.isVisible());
         settings.setUpdateMovesToGeneration(mdUpdateComboBox.getSelectedIndex() + (romHandler.generationOfPokemon()+1));
         settings.setRandomizeTrainerNames(tpRandomizeTrainerNamesCheckBox.isSelected());
@@ -1910,6 +1913,9 @@ public class NewRandomizerGUI {
         peRemoveTimeBasedEvolutionsCheckBox.setVisible(true);
         peRemoveTimeBasedEvolutionsCheckBox.setEnabled(false);
         peRemoveTimeBasedEvolutionsCheckBox.setSelected(false);
+        peRandomizeSwapEvolutionMethods.setVisible(true);
+        peRandomizeSwapEvolutionMethods.setEnabled(false);
+        peRandomizeSwapEvolutionMethods.setSelected(false);
         peAllowAltFormesCheckBox.setVisible(true);
         peAllowAltFormesCheckBox.setEnabled(false);
         peAllowAltFormesCheckBox.setSelected(false);
@@ -2471,6 +2477,7 @@ public class NewRandomizerGUI {
             peChangeImpossibleEvosCheckBox.setEnabled(true);
             peMakeEvolutionsEasierCheckBox.setEnabled(true);
             peRemoveTimeBasedEvolutionsCheckBox.setEnabled(true);
+            peRandomizeSwapEvolutionMethods.setEnabled(true);
             peAllowAltFormesCheckBox.setVisible(pokemonGeneration >= 7);
 
             // Starters, Statics & Trades
