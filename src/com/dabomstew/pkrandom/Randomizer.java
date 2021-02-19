@@ -541,6 +541,8 @@ public class Randomizer {
             romHandler.ensureTMEvolutionSanity();
         }
 
+        maybeLogTMHMCompatibility(log, romHandler);
+
         // Move Tutors (new 1.0.3)
         if (romHandler.hasMoveTutors()) {
             boolean noBrokenTutorMoves = settings.isBlockBrokenTutorMoves();
@@ -586,6 +588,8 @@ public class Randomizer {
             if (settings.isTutorEvolutionSanity()) {
                 romHandler.ensureMoveTutorEvolutionSanity();
             }
+
+            maybeLogTutorCompatibility(log, romHandler);
         }
 
         // In-game trades
@@ -767,6 +771,48 @@ public class Randomizer {
                 }
             }
             log.println();
+        }
+    }
+
+    private void maybeLogTMHMCompatibility(final PrintStream log, final RomHandler romHandler) {
+        if (settings.getTmsHmsCompatibilityMod() != Settings.TMsHMsCompatibilityMod.UNCHANGED) {
+            log.println("--TM Compatibility--");
+            Map<Pokemon, boolean[]> compat = romHandler.getTMHMCompatibility();
+            List<Integer> tmHMs = new ArrayList<>(romHandler.getTMMoves());
+            tmHMs.addAll(romHandler.getHMMoves());
+            List<Move> moveData = romHandler.getMoves();
+
+            logCompatibility(log, compat, tmHMs, moveData);
+        }
+    }
+
+    private void maybeLogTutorCompatibility(final PrintStream log, final RomHandler romHandler) {
+        if (settings.getTmsHmsCompatibilityMod() != Settings.TMsHMsCompatibilityMod.UNCHANGED) {
+            log.println("--Move Tutor Compatibility--");
+            Map<Pokemon, boolean[]> compat = romHandler.getMoveTutorCompatibility();
+            List<Integer> tutorMoves = romHandler.getMoveTutorMoves();
+            List<Move> moveData = romHandler.getMoves();
+
+            logCompatibility(log, compat, tutorMoves, moveData);
+        }
+    }
+
+    private void logCompatibility(final PrintStream log, Map<Pokemon, boolean[]> compat, List<Integer> moveList,
+                                  List<Move> moveData) {
+        for (Map.Entry<Pokemon, boolean[]> entry : compat.entrySet()) {
+            Pokemon pkmn = entry.getKey();
+            boolean[] flags = entry.getValue();
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(pkmn.fullName()).append(": ");
+
+            for (int i = 1; i < flags.length; i++) {
+                if (flags[i]) {
+                    sb.append(moveData.get(moveList.get(i - 1)).name).append(", ");
+                }
+            }
+
+            log.println(sb.toString());
         }
     }
 
