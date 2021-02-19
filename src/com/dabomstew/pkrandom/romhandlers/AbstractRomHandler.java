@@ -2730,34 +2730,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // type themed?
                 Type typeOfMove = null;
                 if (typeThemed) {
-                    double picked = random.nextDouble();
-                    if ((pkmn.primaryType == Type.NORMAL && pkmn.secondaryType != null) ||
-                            (pkmn.secondaryType == Type.NORMAL)) {
-
-                        Type otherType = pkmn.primaryType == Type.NORMAL ? pkmn.secondaryType : pkmn.primaryType;
-
-                        // Normal/OTHER: 10% normal, 30% other, 60% random
-                        if (picked < 0.1) {
-                            typeOfMove = Type.NORMAL;
-                        } else if (picked < 0.4) {
-                            typeOfMove = otherType;
-                        }
-                        // else random
-                    } else if (pkmn.secondaryType != null) {
-                        // Primary/Secondary: 20% primary, 20% secondary, 60% random
-                        if (picked < 0.2) {
-                            typeOfMove = pkmn.primaryType;
-                        } else if (picked < 0.4) {
-                            typeOfMove = pkmn.secondaryType;
-                        }
-                        // else random
-                    } else {
-                        // Primary/None: 40% primary, 60% random
-                        if (picked < 0.4) {
-                            typeOfMove = pkmn.primaryType;
-                        }
-                        // else random
-                    }
+                    typeOfMove = decideMoveType(pkmn, attemptDamaging);
                 }
 
                 // select a list to pick a move from that has at least one free
@@ -2804,6 +2777,61 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Done, save
         this.setMovesLearnt(movesets);
 
+    }
+
+    private Type decideMoveType(Pokemon pkmn, boolean goodDamaging) {
+        double picked = random.nextDouble();
+        if (pkmn.secondaryType == null) {
+            // Single type
+            if (pkmn.primaryType == Type.NORMAL) {
+                // Normal/None: 65% normal, 35% random
+                if (picked < 0.65) {
+                    return Type.NORMAL;
+                }
+                // else random
+            }
+            else {
+                // Primary/None: 45% primary, 30% normal, 25% random
+                if (picked < 0.45) {
+                    return pkmn.primaryType;
+                } else if (picked < 0.75) {
+                    // If good damaging move, redistribute normal to other types
+                    if (goodDamaging) {
+                        return picked < 0.7 ? pkmn.primaryType : null;
+                    }
+                    return Type.NORMAL;
+                }
+                // else random
+            }
+        }
+        else {
+            // Dual type
+            if (pkmn.primaryType == Type.NORMAL || pkmn.secondaryType == Type.NORMAL) {
+                Type otherType = pkmn.primaryType == Type.NORMAL ? pkmn.secondaryType : pkmn.primaryType;
+                // Normal/OTHER: 35% normal, 35% other, 30% random
+                if (picked < 0.4) {
+                    return Type.NORMAL;
+                } else if (picked < 0.7) {
+                    return otherType;
+                }
+                // else random
+            } else {
+                // Primary/Secondary: 35% primary, 20% secondary, 25% normal, 20% random
+                if (picked < 0.35) {
+                    return pkmn.primaryType;
+                } else if (picked < 0.55) {
+                    return pkmn.secondaryType;
+                } else if (picked < 0.8) {
+                    // If good damaging move, redistribute normal to other types
+                    if (goodDamaging) {
+                        return picked < 0.75 ? (picked < 0.65 ? pkmn.primaryType : pkmn.secondaryType) : null;
+                    }
+                    return Type.NORMAL;
+                }
+                // else random
+            }
+        }
+        return null;
     }
 
     @Override
@@ -3299,7 +3327,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
                         probability = 0.5;
                     } else {
-                        probability = 0.25;
+                        probability = 0.2;
                     }
                 }
                 if (requiredEarlyOn.contains(move)) {
