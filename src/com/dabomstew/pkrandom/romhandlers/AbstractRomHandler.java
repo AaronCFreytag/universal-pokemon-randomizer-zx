@@ -2634,9 +2634,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Build sets of moves
         List<Move> validMoves = new ArrayList<>();
-        List<Move> validDamagingMoves = new ArrayList<>();
+        List<List<Move>> validDamagingMoves = new ArrayList<>();
+        validDamagingMoves.add(new ArrayList<>());
+        validDamagingMoves.add(new ArrayList<>());
         Map<Type, List<Move>> validTypeMoves = new HashMap<>();
-        Map<Type, List<Move>> validTypeDamagingMoves = new HashMap<>();
+        Map<Type, List<List<Move>>> validTypeDamagingMoves = new HashMap<>();
 
         for (Move mv : allMoves) {
             if (mv != null && !GlobalConstants.bannedRandomMoves[mv.number] && !allBanned.contains(mv.number)) {
@@ -2651,12 +2653,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (!GlobalConstants.bannedForDamagingMove[mv.number]) {
                     if ((mv.power * mv.hitCount) >= 2 * GlobalConstants.MIN_DAMAGING_MOVE_POWER
                             || ((mv.power * mv.hitCount) >= GlobalConstants.MIN_DAMAGING_MOVE_POWER && mv.hitratio >= 90)) {
-                        validDamagingMoves.add(mv);
+                        int moveCategoryIndex = mv.category == MoveCategory.PHYSICAL ? 0 : 1;
+                        validDamagingMoves.get(moveCategoryIndex).add(mv);
                         if (mv.type != null) {
                             if (!validTypeDamagingMoves.containsKey(mv.type)) {
                                 validTypeDamagingMoves.put(mv.type, new ArrayList<>());
+                                validTypeDamagingMoves.get(mv.type).add(new ArrayList<>());
+                                validTypeDamagingMoves.get(mv.type).add(new ArrayList<>());
                             }
-                            validTypeDamagingMoves.get(mv.type).add(mv);
+                            validTypeDamagingMoves.get(mv.type).get(moveCategoryIndex).add(mv);
                         }
                     }
                 }
@@ -2758,15 +2763,20 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // select a list to pick a move from that has at least one free
                 List<Move> pickList = validMoves;
                 if (attemptDamaging) {
-                    if (typeOfMove != null) {
-                        if (validTypeDamagingMoves.containsKey(typeOfMove)
-                                && checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove), learnt)) {
-                            pickList = validTypeDamagingMoves.get(typeOfMove);
-                        } else if (checkForUnusedMove(validDamagingMoves, learnt)) {
-                            pickList = validDamagingMoves;
+                    // Pick damaging move based on atk/spatk ratio
+                    double threshold = Math.pow(pkmn.spatk, 3) / (Math.pow(pkmn.attack, 3) + Math.pow(pkmn.spatk, 3));
+                    List<Integer> tryOrder = random.nextDouble() < threshold ? List.of(0, 1) : List.of(1, 0);
+                    for (int categoryIndex : tryOrder) {
+                        if (typeOfMove != null) {
+                            if (validTypeDamagingMoves.containsKey(typeOfMove)
+                                    && checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove).get(categoryIndex), learnt)) {
+                                pickList = validTypeDamagingMoves.get(typeOfMove).get(categoryIndex);
+                            } else if (checkForUnusedMove(validDamagingMoves.get(categoryIndex), learnt)) {
+                                pickList = validDamagingMoves.get(categoryIndex);
+                            }
+                        } else if (checkForUnusedMove(validDamagingMoves.get(categoryIndex), learnt)) {
+                            pickList = validDamagingMoves.get(categoryIndex);
                         }
-                    } else if (checkForUnusedMove(validDamagingMoves, learnt)) {
-                        pickList = validDamagingMoves;
                     }
                 } else if (typeOfMove != null) {
                     if (validTypeMoves.containsKey(typeOfMove)
