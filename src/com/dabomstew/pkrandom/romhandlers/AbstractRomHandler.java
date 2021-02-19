@@ -3571,12 +3571,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (pkmn.primaryType.equals(mv.type)
                         || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
                     probability = 0.9;
+                } else if (mv.category == MoveCategory.STATUS) {
+                    probability = 0.25;
                 } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
                     probability = 0.6;
-                } else if (mv.category == MoveCategory.STATUS) {
-                    probability = 0.3;
                 } else {
-                    probability = 0.2;
+                    probability = 0.15;
                 }
             }
             if (requiredEarlyOn) {
@@ -3760,7 +3760,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     Move mv = moveData.get(move);
                     // Slight chance to gain TM/HM compatibility for a move if not learned by an earlier evolution step
                     // If types changed and prefer same, increase chance of gaining TM compatibility with changed type(s)
-                    double probability = 0.1;
+                    double probability = 0.05;
                     if (preferSameType
                             && mv.type.equals(evTo.primaryType) && !evTo.primaryType.equals(evFrom.primaryType)
                             || mv.type.equals(evTo.secondaryType) && !evTo.secondaryType.equals(evFrom.secondaryType)) {
