@@ -2830,9 +2830,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Build sets of moves
         List<Move> validMoves = new ArrayList<>();
-        List<Move> validDamagingMoves = new ArrayList<>();
+        List<List<Move>> validDamagingMoves = new ArrayList<>();
+        validDamagingMoves.add(new ArrayList<>());
+        validDamagingMoves.add(new ArrayList<>());
         Map<Type, List<Move>> validTypeMoves = new HashMap<>();
-        Map<Type, List<Move>> validTypeDamagingMoves = new HashMap<>();
+        Map<Type, List<List<Move>>> validTypeDamagingMoves = new HashMap<>();
 
         for (Move mv : allMoves) {
             if (mv != null && !GlobalConstants.bannedRandomMoves[mv.number] && !allBanned.contains(mv.number)) {
@@ -2847,12 +2849,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (!GlobalConstants.bannedForDamagingMove[mv.number]) {
                     if ((mv.power * mv.hitCount) >= 2 * GlobalConstants.MIN_DAMAGING_MOVE_POWER
                             || ((mv.power * mv.hitCount) >= GlobalConstants.MIN_DAMAGING_MOVE_POWER && mv.hitratio >= 90)) {
-                        validDamagingMoves.add(mv);
+                        int moveCategoryIndex = mv.category == MoveCategory.PHYSICAL ? 0 : 1;
+                        validDamagingMoves.get(moveCategoryIndex).add(mv);
                         if (mv.type != null) {
                             if (!validTypeDamagingMoves.containsKey(mv.type)) {
                                 validTypeDamagingMoves.put(mv.type, new ArrayList<>());
+                                validTypeDamagingMoves.get(mv.type).add(new ArrayList<>());
+                                validTypeDamagingMoves.get(mv.type).add(new ArrayList<>());
                             }
-                            validTypeDamagingMoves.get(mv.type).add(mv);
+                            validTypeDamagingMoves.get(mv.type).get(moveCategoryIndex).add(mv);
                         }
                     }
                 }
@@ -2921,48 +2926,26 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // type themed?
                 Type typeOfMove = null;
                 if (typeThemed) {
-                    double picked = random.nextDouble();
-                    if ((pkmn.primaryType == Type.NORMAL && pkmn.secondaryType != null) ||
-                            (pkmn.secondaryType == Type.NORMAL)) {
-
-                        Type otherType = pkmn.primaryType == Type.NORMAL ? pkmn.secondaryType : pkmn.primaryType;
-
-                        // Normal/OTHER: 10% normal, 30% other, 60% random
-                        if (picked < 0.1) {
-                            typeOfMove = Type.NORMAL;
-                        } else if (picked < 0.4) {
-                            typeOfMove = otherType;
-                        }
-                        // else random
-                    } else if (pkmn.secondaryType != null) {
-                        // Primary/Secondary: 20% primary, 20% secondary, 60% random
-                        if (picked < 0.2) {
-                            typeOfMove = pkmn.primaryType;
-                        } else if (picked < 0.4) {
-                            typeOfMove = pkmn.secondaryType;
-                        }
-                        // else random
-                    } else {
-                        // Primary/None: 40% primary, 60% random
-                        if (picked < 0.4) {
-                            typeOfMove = pkmn.primaryType;
-                        }
-                        // else random
-                    }
+                    typeOfMove = decideMoveType(pkmn, attemptDamaging);
                 }
 
                 // select a list to pick a move from that has at least one free
                 List<Move> pickList = validMoves;
                 if (attemptDamaging) {
-                    if (typeOfMove != null) {
-                        if (validTypeDamagingMoves.containsKey(typeOfMove)
-                                && checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove), learnt)) {
-                            pickList = validTypeDamagingMoves.get(typeOfMove);
-                        } else if (checkForUnusedMove(validDamagingMoves, learnt)) {
-                            pickList = validDamagingMoves;
+                    // Pick damaging move based on atk/spatk ratio
+                    double threshold = Math.pow(pkmn.spatk, 3) / (Math.pow(pkmn.attack, 3) + Math.pow(pkmn.spatk, 3));
+                    List<Integer> tryOrder = random.nextDouble() < threshold ? List.of(0, 1) : List.of(1, 0);
+                    for (int categoryIndex : tryOrder) {
+                        if (typeOfMove != null) {
+                            if (validTypeDamagingMoves.containsKey(typeOfMove)
+                                    && checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove).get(categoryIndex), learnt)) {
+                                pickList = validTypeDamagingMoves.get(typeOfMove).get(categoryIndex);
+                            } else if (checkForUnusedMove(validDamagingMoves.get(categoryIndex), learnt)) {
+                                pickList = validDamagingMoves.get(categoryIndex);
+                            }
+                        } else if (checkForUnusedMove(validDamagingMoves.get(categoryIndex), learnt)) {
+                            pickList = validDamagingMoves.get(categoryIndex);
                         }
-                    } else if (checkForUnusedMove(validDamagingMoves, learnt)) {
-                        pickList = validDamagingMoves;
                     }
                 } else if (typeOfMove != null) {
                     if (validTypeMoves.containsKey(typeOfMove)
@@ -2990,6 +2973,61 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Done, save
         this.setMovesLearnt(movesets);
 
+    }
+
+    private Type decideMoveType(Pokemon pkmn, boolean goodDamaging) {
+        double picked = random.nextDouble();
+        if (pkmn.secondaryType == null) {
+            // Single type
+            if (pkmn.primaryType == Type.NORMAL) {
+                // Normal/None: 65% normal, 35% random
+                if (picked < 0.65) {
+                    return Type.NORMAL;
+                }
+                // else random
+            }
+            else {
+                // Primary/None: 45% primary, 30% normal, 25% random
+                if (picked < 0.45) {
+                    return pkmn.primaryType;
+                } else if (picked < 0.75) {
+                    // If good damaging move, redistribute normal to other types
+                    if (goodDamaging) {
+                        return picked < 0.7 ? pkmn.primaryType : null;
+                    }
+                    return Type.NORMAL;
+                }
+                // else random
+            }
+        }
+        else {
+            // Dual type
+            if (pkmn.primaryType == Type.NORMAL || pkmn.secondaryType == Type.NORMAL) {
+                Type otherType = pkmn.primaryType == Type.NORMAL ? pkmn.secondaryType : pkmn.primaryType;
+                // Normal/OTHER: 35% normal, 35% other, 30% random
+                if (picked < 0.4) {
+                    return Type.NORMAL;
+                } else if (picked < 0.7) {
+                    return otherType;
+                }
+                // else random
+            } else {
+                // Primary/Secondary: 35% primary, 20% secondary, 25% normal, 20% random
+                if (picked < 0.35) {
+                    return pkmn.primaryType;
+                } else if (picked < 0.55) {
+                    return pkmn.secondaryType;
+                } else if (picked < 0.8) {
+                    // If good damaging move, redistribute normal to other types
+                    if (goodDamaging) {
+                        return picked < 0.75 ? (picked < 0.65 ? pkmn.primaryType : pkmn.secondaryType) : null;
+                    }
+                    return Type.NORMAL;
+                }
+                // else random
+            }
+        }
+        return null;
     }
 
     @Override
