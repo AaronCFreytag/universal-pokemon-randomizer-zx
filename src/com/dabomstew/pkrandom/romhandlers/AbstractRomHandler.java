@@ -2993,7 +2993,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 } else if (picked < 0.75) {
                     // If good damaging move, redistribute normal to other types
                     if (goodDamaging) {
-                        return picked < 0.7 ? pkmn.primaryType : null;
+                        return picked < 0.65 ? pkmn.primaryType : null;
                     }
                     return Type.NORMAL;
                 }
@@ -3572,9 +3572,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                         || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
                     probability = 0.9;
                 } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
-                    probability = 0.5;
+                    probability = 0.6;
+                } else if (mv.category == MoveCategory.STATUS) {
+                    probability = 0.3;
                 } else {
-                    probability = 0.25;
+                    probability = 0.2;
                 }
             }
             if (requiredEarlyOn) {
