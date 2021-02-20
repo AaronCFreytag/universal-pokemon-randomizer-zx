@@ -165,6 +165,9 @@ public class Randomizer {
         case RANDOM_FOLLOW_EVOLUTIONS:
             romHandler.randomizePokemonTypes(true, settings.isTypesFollowMegaEvolutions());
             break;
+        case RANDOM_AUGMENTED:
+            romHandler.augmentPokemonTypes(settings.isTypesFollowMegaEvolutions());
+            break;
         case COMPLETELY_RANDOM:
             romHandler.randomizePokemonTypes(false, settings.isTypesFollowMegaEvolutions());
             break;

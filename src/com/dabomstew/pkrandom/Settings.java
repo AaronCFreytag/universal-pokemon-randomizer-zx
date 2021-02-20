@@ -114,7 +114,7 @@ public class Settings {
     private boolean banBadRandomStarterHeldItems;
 
     public enum TypesMod {
-        UNCHANGED, RANDOM_FOLLOW_EVOLUTIONS, COMPLETELY_RANDOM
+        UNCHANGED, RANDOM_FOLLOW_EVOLUTIONS, COMPLETELY_RANDOM, RANDOM_AUGMENTED
     }
 
     private TypesMod typesMod = TypesMod.UNCHANGED;

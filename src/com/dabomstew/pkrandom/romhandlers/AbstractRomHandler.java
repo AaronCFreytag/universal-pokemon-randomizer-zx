@@ -774,6 +774,63 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void augmentPokemonTypes(boolean megaEvolutionSanity) {
+        List<Pokemon> allPokes = this.getPokemonInclFormes();
+        Set<Pokemon> eligibleMons = new HashSet<>();
+        for (Pokemon pk : allPokes) {
+            if (pk != null && pk.evolutionsFrom.size() == 0) {
+                boolean eligible = pk.secondaryType == null;
+                if (eligible) {
+                    // If any final evolution is eligible, the whole line is eligible
+                    eligibleMons.add(pk);
+                    Pokemon tmp = pk;
+                    while (tmp.evolutionsTo.size() > 0) {
+                        tmp = tmp.evolutionsTo.get(0).from;
+                        eligibleMons.add(tmp);
+                    }
+                }
+            }
+        }
+        copyUpEvolutionsHelper(pk -> {
+            // Step 1: Basic or Excluded From Copying Pokemon
+            // A Basic/EFC pokemon has a 35% chance of a second type if
+            // it has an evolution that copies type/stats, a 50% chance
+            // otherwise
+            if (eligibleMons.contains(pk)) {
+                double probability = pk.evolutionsFrom.size() > 0 ? 0.1 : 0.3;
+                if (AbstractRomHandler.this.random.nextDouble() < probability) {
+                    pk.secondaryType = randomType();
+                    while (pk.secondaryType == pk.primaryType) {
+                        pk.secondaryType = randomType();
+                    }
+                }
+            }
+        }, (evFrom, evTo, toMonIsFinalEvo) -> {
+            if (eligibleMons.contains(evTo)) {
+                evTo.secondaryType = evFrom.secondaryType;
+                double probability = toMonIsFinalEvo ? 0.25 : 0.1;
+                if (evTo.secondaryType == null && AbstractRomHandler.this.random.nextDouble() < probability) {
+                    evTo.secondaryType = randomType();
+                    while (evTo.secondaryType == evTo.primaryType) {
+                        evTo.secondaryType = randomType();
+                    }
+                }
+            }
+        }, false);
+
+        for (Pokemon pk : allPokes) {
+            if (pk != null && pk.actuallyCosmetic) {
+                pk.primaryType = pk.baseForme.primaryType;
+                pk.secondaryType = pk.baseForme.secondaryType;
+            }
+        }
+
+        if (megaEvolutionSanity) {
+            // Figure out what to do with mega evolution sanity later
+        }
+    }
+
+    @Override
     public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
                                    boolean banNegativeAbilities, boolean banBadAbilities, boolean megaEvolutionSanity,
                                    boolean weighDuplicatesTogether, boolean retainNumberOfAbilities) {

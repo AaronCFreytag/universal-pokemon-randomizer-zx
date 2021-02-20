@@ -160,6 +160,8 @@ public interface RomHandler {
     // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
     void randomizePokemonTypes(boolean evolutionSanity, boolean megaEvolutionSanity);
 
+    void augmentPokemonTypes(boolean megaEvolutionSanity);
+
     // Randomizer: pokemon abilities
     int abilitiesPerPokemon();
 

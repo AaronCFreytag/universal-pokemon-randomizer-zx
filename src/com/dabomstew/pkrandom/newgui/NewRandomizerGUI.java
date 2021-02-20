@@ -280,6 +280,7 @@ public class NewRandomizerGUI {
     private JCheckBox mtFollowEvolutionsCheckBox;
     private JRadioButton pbsSwapRadioButton;
     private JCheckBox peRandomizeSwapEvolutionMethods;
+    private JRadioButton ptRandomAugmentedRadioButton;
 
     private static JFrame frame;
 
@@ -523,6 +524,7 @@ public class NewRandomizerGUI {
         ptUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ptRandomFollowEvolutionsRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ptRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        ptRandomAugmentedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spRandomizeStarterHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
     }
 
@@ -1310,6 +1312,7 @@ public class NewRandomizerGUI {
         ptRandomFollowEvolutionsRadioButton.setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_FOLLOW_EVOLUTIONS);
         ptRandomCompletelyRadioButton.setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
         ptUnchangedRadioButton.setSelected(settings.getTypesMod() == Settings.TypesMod.UNCHANGED);
+        ptRandomAugmentedRadioButton.setSelected((settings.getTypesMod() == Settings.TypesMod.RANDOM_AUGMENTED));
         ptFollowMegaEvosCheckBox.setSelected(settings.isTypesFollowMegaEvolutions());
         pmsNoGameBreakingMovesCheckBox.setSelected(settings.doBlockBrokenMoves());
 
@@ -1538,7 +1541,7 @@ public class NewRandomizerGUI {
         settings.setRetainNumberOfAbilities(paRetainNumberOfAbilitiesCheckBox.isSelected());
 
         settings.setTypesMod(ptUnchangedRadioButton.isSelected(), ptRandomFollowEvolutionsRadioButton.isSelected(),
-                ptRandomCompletelyRadioButton.isSelected());
+                ptRandomCompletelyRadioButton.isSelected(), ptRandomAugmentedRadioButton.isSelected());
         settings.setTypesFollowMegaEvolutions(ptFollowMegaEvosCheckBox.isSelected() && ptFollowMegaEvosCheckBox.isVisible());
         settings.setBlockBrokenMovesetMoves(pmsNoGameBreakingMovesCheckBox.isSelected());
 
@@ -1853,6 +1856,9 @@ public class NewRandomizerGUI {
         ptRandomCompletelyRadioButton.setVisible(true);
         ptRandomCompletelyRadioButton.setEnabled(false);
         ptRandomCompletelyRadioButton.setSelected(false);
+        ptRandomAugmentedRadioButton.setVisible(true);
+        ptRandomAugmentedRadioButton.setEnabled(false);
+        ptRandomAugmentedRadioButton.setSelected(false);
         ptFollowMegaEvosCheckBox.setVisible(true);
         ptFollowMegaEvosCheckBox.setEnabled(false);
         ptFollowMegaEvosCheckBox.setSelected(false);
@@ -2445,6 +2451,7 @@ public class NewRandomizerGUI {
             ptUnchangedRadioButton.setSelected(true);
             ptRandomFollowEvolutionsRadioButton.setEnabled(true);
             ptRandomCompletelyRadioButton.setEnabled(true);
+            ptRandomAugmentedRadioButton.setEnabled(true);
             ptFollowMegaEvosCheckBox.setVisible(romHandler.hasMegaEvolutions());
 
             // Pokemon Abilities
