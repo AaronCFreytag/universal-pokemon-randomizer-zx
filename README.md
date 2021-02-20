@@ -1,3 +1,21 @@
+Universal Pokemon Randomizer ZX Advent
+
+This is a fork of Pokemon Randomizer ZX which has some additional changes designed for a bit less of a crazy random experience while still retaining randomization elements. These changes also include various QOL settings and new features.
+
+Notable differences:
+- Pokemon statline swapping, with associated pokemon evolution method swapping
+- "Augmented" type randomization, which will infrequently add a secondary type to a monotype evolution line
+- TM/Tutor compatibility evolution following
+- Tweaked same-type move learning probability to be more biased towards a pokemon's type(s) and normal type moves
+- (Currently extremely limited) Pokemon Showdown mod file export
+
+These features have not yet been extensively tested ingame so the stability of this version is somewhat unknown.
+NOTE: Settings will not be compatible between this version and the main version
+
+Original Universal Pokemon Randomizer ZX README.md is below.
+
+---
+
 Universal Pokemon Randomizer ZX by Ajarmar
 
 With significant contributions from darkeye, cleartonic
