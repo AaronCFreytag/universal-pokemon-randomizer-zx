@@ -347,17 +347,18 @@ public class Settings {
 
         // 0: general options #1 + trainer/class names
         out.write(makeByteSelected(changeImpossibleEvolutions, updateMoves, updateMovesLegacy, randomizeTrainerNames,
-                randomizeTrainerClassNames, makeEvolutionsEasier, removeTimeBasedEvolutions));
+                randomizeTrainerClassNames, makeEvolutionsEasier, removeTimeBasedEvolutions, randomizeEvolutionsWithSwap));
 
         // 1: pokemon base stats & abilities
         out.write(makeByteSelected(baseStatsFollowEvolutions, baseStatisticsMod == BaseStatisticsMod.RANDOM,
                 baseStatisticsMod == BaseStatisticsMod.SHUFFLE, baseStatisticsMod == BaseStatisticsMod.UNCHANGED,
-                standardizeEXPCurves, updateBaseStats, baseStatsFollowMegaEvolutions));
+                baseStatisticsMod == BaseStatisticsMod.SWAP, standardizeEXPCurves, updateBaseStats,
+                baseStatsFollowMegaEvolutions));
 
         // 2: pokemon types & more general options
         out.write(makeByteSelected(typesMod == TypesMod.RANDOM_FOLLOW_EVOLUTIONS,
-                typesMod == TypesMod.COMPLETELY_RANDOM, typesMod == TypesMod.UNCHANGED, raceMode, blockBrokenMoves,
-                limitPokemon, typesFollowMegaEvolutions));
+                typesMod == TypesMod.COMPLETELY_RANDOM, typesMod == TypesMod.UNCHANGED, typesMod == TypesMod.RANDOM_AUGMENTED,
+                raceMode, blockBrokenMoves, limitPokemon, typesFollowMegaEvolutions));
 
         // 3: v171: changed to the abilities byte
 
@@ -427,7 +428,7 @@ public class Settings {
 
         // 19 tms part 2
         // new in 170
-        out.write(makeByteSelected(fullHMCompat));
+        out.write(makeByteSelected(fullHMCompat, tmsEvolutionSanity));
 
         // 20 tms good damaging
         out.write((tmsForceGoodDamaging ? 0x80 : 0) | tmsGoodDamagingPercent);
@@ -484,7 +485,6 @@ public class Settings {
         } catch (IOException e) {
             e.printStackTrace(); // better than nothing
         }
-        
 
 
         // @ 31 misc tweaks
@@ -544,6 +544,9 @@ public class Settings {
 
         out.write(selectedEXPCurve.toByte());
 
+        // 47 more extra stuff
+        out.write(makeByteSelected(tutorEvolutionSanity, retainNumberOfAbilities));
+
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -580,24 +583,27 @@ public class Settings {
         settings.setRandomizeTrainerClassNames(restoreState(data[0], 4));
         settings.setMakeEvolutionsEasier(restoreState(data[0], 5));
         settings.setRemoveTimeBasedEvolutions(restoreState(data[0], 6));
+        settings.setRandomizeEvolutionsWithSwap(restoreState(data[0], 7));
 
         settings.setBaseStatisticsMod(restoreEnum(BaseStatisticsMod.class, data[1], 3, // UNCHANGED
                 2, // SHUFFLE
-                1 // RANDOM
+                1, // RANDOM
+                4  // SWAP
         ));
-        settings.setStandardizeEXPCurves(restoreState(data[1], 4));
+        settings.setStandardizeEXPCurves(restoreState(data[1], 5));
         settings.setBaseStatsFollowEvolutions(restoreState(data[1], 0));
-        settings.setUpdateBaseStats(restoreState(data[1], 5));
-        settings.setBaseStatsFollowMegaEvolutions(restoreState(data[1],6));
+        settings.setUpdateBaseStats(restoreState(data[1], 6));
+        settings.setBaseStatsFollowMegaEvolutions(restoreState(data[1],7));
 
         settings.setTypesMod(restoreEnum(TypesMod.class, data[2], 2, // UNCHANGED
                 0, // RANDOM_FOLLOW_EVOLUTIONS
-                1 // COMPLETELY_RANDOM
+                1, // COMPLETELY_RANDOM
+                3  // RANDOM_AUGMENTED
         ));
-        settings.setRaceMode(restoreState(data[2], 3));
-        settings.setBlockBrokenMoves(restoreState(data[2], 4));
-        settings.setLimitPokemon(restoreState(data[2], 5));
-        settings.setTypesFollowMegaEvolutions(restoreState(data[2],6));
+        settings.setRaceMode(restoreState(data[2], 4));
+        settings.setBlockBrokenMoves(restoreState(data[2], 5));
+        settings.setLimitPokemon(restoreState(data[2], 6));
+        settings.setTypesFollowMegaEvolutions(restoreState(data[2],7));
 
         settings.setAbilitiesMod(restoreEnum(AbilitiesMod.class, data[3], 0, // UNCHANGED
                 1 // RANDOMIZE
@@ -686,6 +692,7 @@ public class Settings {
         settings.setTmLevelUpMoveSanity(restoreState(data[18], 5));
         settings.setKeepFieldMoveTMs(restoreState(data[18], 6));
         settings.setFullHMCompat(restoreState(data[19], 0));
+        settings.setTmsEvolutionSanity(restoreState(data[19], 1));
 
         settings.setTmsForceGoodDamaging(restoreState(data[20], 7));
         settings.setTmsGoodDamagingPercent(data[20] & 0x7F);
@@ -807,6 +814,9 @@ public class Settings {
         settings.setUpdateMovesToGeneration(data[45]);
 
         settings.setSelectedEXPCurve(ExpCurve.fromByte(data[46]));
+
+        settings.setTutorEvolutionSanity(restoreState(data[47], 0));
+        settings.setRetainNumberOfAbilities(restoreState(data[47], 1));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
