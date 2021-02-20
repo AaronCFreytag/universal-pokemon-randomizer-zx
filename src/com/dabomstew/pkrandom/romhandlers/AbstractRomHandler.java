@@ -2990,18 +2990,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                 List<Move> pickList = validMoves;
                 if (attemptDamaging) {
                     // Pick damaging move based on atk/spatk ratio
-                    double threshold = Math.pow(pkmn.spatk, 3) / (Math.pow(pkmn.attack, 3) + Math.pow(pkmn.spatk, 3));
+                    double threshold = Math.pow(pkmn.attack, 3) / (Math.pow(pkmn.attack, 3) + Math.pow(pkmn.spatk, 3));
                     List<Integer> tryOrder = random.nextDouble() < threshold ? List.of(0, 1) : List.of(1, 0);
                     for (int categoryIndex : tryOrder) {
                         if (typeOfMove != null) {
                             if (validTypeDamagingMoves.containsKey(typeOfMove)
                                     && checkForUnusedMove(validTypeDamagingMoves.get(typeOfMove).get(categoryIndex), learnt)) {
                                 pickList = validTypeDamagingMoves.get(typeOfMove).get(categoryIndex);
+                                break;
                             } else if (checkForUnusedMove(validDamagingMoves.get(categoryIndex), learnt)) {
                                 pickList = validDamagingMoves.get(categoryIndex);
+                                break;
                             }
                         } else if (checkForUnusedMove(validDamagingMoves.get(categoryIndex), learnt)) {
                             pickList = validDamagingMoves.get(categoryIndex);
+                            break;
                         }
                     }
                 } else if (typeOfMove != null) {
