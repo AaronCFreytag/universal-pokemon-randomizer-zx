@@ -359,26 +359,30 @@ public class Randomizer {
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, false, false,
                     settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
+                    settings.isTrainersNoDuplicatePokemon(), settings.isTrainerBossBoost());
         } else if (settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED) {
             romHandler.typeThemeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
                     settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0,
                     settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
+                    settings.isTrainersNoDuplicatePokemon(), settings.isTrainerBossBoost());
         } else if (settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, false,
                     settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
+                    settings.isTrainersNoDuplicatePokemon(), settings.isTrainerBossBoost());
         } else if (settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH) {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
                     settings.isTrainersBlockLegendaries(), settings.isTrainersBlockEarlyWonderGuard(),
                     settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0, true, true,
                     settings.isAllowTrainerAlternateFormes(), settings.isSwapTrainerMegaEvos(), settings.isShinyChance(),
-                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
+                    settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
+                    settings.isTrainersNoDuplicatePokemon(), settings.isTrainerBossBoost());
         } else {
             if (settings.isTrainersLevelModified()) {
                 romHandler.onlyChangeTrainerLevels(settings.getTrainersLevelModifier());

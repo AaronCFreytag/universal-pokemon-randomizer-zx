@@ -1831,7 +1831,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
                                       int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
                                       boolean includeFormes, boolean swapMegaEvos, boolean shinyChance,
-                                      boolean abilitiesAreRandomized) {
+                                      boolean abilitiesAreRandomized, boolean bossesNoDupes, boolean bossBstBoost) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         // New: randomize the order trainers are randomized in.
@@ -1870,9 +1870,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // starter, so we can't change it here. Just skip it
                 continue;
             }
+            Set<Pokemon> trainerCannotUsePokemon = new TreeSet<Pokemon>();
             for (TrainerPokemon tp : t.pokemon) {
                 boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                boolean isBossTrainer = t.isBoss() || t.isImportant();
                 Pokemon newPK;
                 Pokemon oldPK = tp.pokemon;
                 if (tp.forme > 0) {
@@ -1895,9 +1897,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         true,
                                         swapThisMegaEvo,
                                         abilitiesAreRandomized,
-                                        includeFormes
+                                        includeFormes,
+                                        trainerCannotUsePokemon,
+                                        bossBstBoost && isBossTrainer
                                 );
                         setPlacementHistory(newPK);
+                        if (bossesNoDupes && isBossTrainer) {
+                            trainerCannotUsePokemon.add(newPK);
+                        }
                         tp.absolutePokeNumber = newPK.number;
                         tp.pokemon = newPK;
                         setFormeForTrainerPokemon(tp, newPK);
@@ -1913,8 +1920,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         false,
                                         swapThisMegaEvo,
                                         abilitiesAreRandomized,
-                                        includeFormes
+                                        includeFormes,
+                                        trainerCannotUsePokemon,
+                                        bossBstBoost && isBossTrainer
                                 );
+                        if (bossesNoDupes && isBossTrainer) {
+                            trainerCannotUsePokemon.add(newPK);
+                        }
                         tp.absolutePokeNumber = newPK.number;
                         tp.pokemon = newPK;
                         setFormeForTrainerPokemon(tp, newPK);
@@ -1930,8 +1942,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     distributionSetting,
                                     swapThisMegaEvo,
                                     abilitiesAreRandomized,
-                                    includeFormes
+                                    includeFormes,
+                                    trainerCannotUsePokemon,
+                                    bossBstBoost && isBossTrainer
                             );
+                    if (bossesNoDupes && isBossTrainer) {
+                        trainerCannotUsePokemon.add(newPK);
+                    }
                     if (distributionSetting) {
                         setPlacementHistory(newPK);
                     }
@@ -1987,7 +2004,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
                                       boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes,
-                                      boolean swapMegaEvos, boolean shinyChance, boolean abilitiesAreRandomized) {
+                                      boolean swapMegaEvos, boolean shinyChance, boolean abilitiesAreRandomized,
+                                      boolean bossesNoDupes, boolean bossBstBoost) {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         cachedReplacementLists = new TreeMap<>();
@@ -2031,7 +2049,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 group = group.substring(0, group.indexOf('-'));
             }
             if (group.startsWith("GYM") || group.startsWith("ELITE") || group.startsWith("CHAMPION")
-                    || group.startsWith("THEMED")) {
+                    || group.startsWith("THEMED") || group.startsWith("RIVAL")) {
                 // Yep this is a group
                 if (!groups.containsKey(group)) {
                     groups.put(group, new ArrayList<>());
@@ -2066,19 +2084,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                 usedGymTypes.add(typeForGroup);
             }
             if (group.startsWith("ELITE")) {
-                while (usedEliteTypes.contains(typeForGroup)) {
+                while (usedEliteTypes.contains(typeForGroup) || usedGymTypes.contains(typeForGroup)) {
                     typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
                 }
                 usedEliteTypes.add(typeForGroup);
             }
-            if (group.equals("CHAMPION")) {
-                usedUberTypes.add(typeForGroup);
+            if (group.equals("CHAMPION") || group.startsWith("RIVAL")) {
+                typeForGroup = null;
             }
             // Themed groups just have a theme, no special criteria
             for (Trainer t : trainersInGroup) {
+                Set<Pokemon> trainerCannotUsePokemon = new TreeSet<Pokemon>();
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                     boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                    boolean isBossTrainer = t.isBoss() || t.isImportant();
                     Pokemon oldPK = tp.pokemon;
                     if (tp.forme > 0) {
                         oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
@@ -2093,10 +2113,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     false,
                                     swapThisMegaEvo,
                                     abilitiesAreRandomized,
-                                    includeFormes
+                                    includeFormes,
+                                    trainerCannotUsePokemon,
+                                    bossBstBoost && isBossTrainer
                             );
                     tp.absolutePokeNumber = newPK.number;
                     tp.pokemon = newPK;
+                    if (bossesNoDupes && isBossTrainer) {
+                        trainerCannotUsePokemon.add(newPK);
+                    }
                     setFormeForTrainerPokemon(tp, newPK);
 
                     if (swapThisMegaEvo) {
@@ -2137,9 +2162,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     usedUberTypes.add(typeForTrainer);
                 }
+                Set<Pokemon> trainerCannotUsePokemon = new TreeSet<Pokemon>();
                 for (TrainerPokemon tp : t.pokemon) {
                     boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                     boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
+                    boolean isBossTrainer = t.isBoss() || t.isImportant();
                     Pokemon oldPK = tp.pokemon;
                     if (tp.forme > 0) {
                         oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
@@ -2154,8 +2181,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     false,
                                     swapThisMegaEvo,
                                     abilitiesAreRandomized,
-                                    includeFormes
+                                    includeFormes,
+                                    trainerCannotUsePokemon,
+                                    bossBstBoost && isBossTrainer
                             );
+                    if (bossesNoDupes && isBossTrainer) {
+                        trainerCannotUsePokemon.add(newPK);
+                    }
                     tp.absolutePokeNumber = newPK.number;
                     tp.pokemon = newPK;
                     setFormeForTrainerPokemon(tp, newPK);
@@ -5486,7 +5518,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private Pokemon pickReplacement(Pokemon current, boolean usePowerLevels, Type type, boolean noLegendaries,
                                     boolean wonderGuardAllowed, boolean usePlacementHistory, boolean swapMegaEvos,
-                                    boolean abilitiesAreRandomized, boolean allowAltFormes) {
+                                    boolean abilitiesAreRandomized, boolean allowAltFormes, final Set<Pokemon> dontChoose,
+                                    boolean boostBst) {
         List<Pokemon> pickFrom;
         if (swapMegaEvos) {
             pickFrom = megaEvolutionsList
@@ -5499,6 +5532,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             pickFrom = getBelowAveragePlacements();
         } else {
             pickFrom = cachedAllList;
+        }
+        if (dontChoose.size() > 0) {
+            pickFrom = pickFrom
+                    .stream()
+                    .filter(mon -> !dontChoose.contains(mon))
+                    .collect(Collectors.toList());
         }
         if (type != null) {
             if (!cachedReplacementLists.containsKey(type)) {
@@ -5531,6 +5570,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             int currentBST = current.bstForPowerLevels();
             int minTarget = currentBST - currentBST / 10;
             int maxTarget = currentBST + currentBST / 10;
+            if (boostBst) {
+                minTarget *= 1.1;
+                maxTarget *= 1.1;
+            }
             List<Pokemon> canPick = new ArrayList<>();
             int expandRounds = 0;
             while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 2)) {
@@ -5539,8 +5582,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                             && pk.bstForPowerLevels() <= maxTarget
                             && (wonderGuardAllowed || (pk.ability1 != GlobalConstants.WONDER_GUARD_INDEX
                                     && pk.ability2 != GlobalConstants.WONDER_GUARD_INDEX && pk.ability3 != GlobalConstants.WONDER_GUARD_INDEX))) {
-                        canPick.add(pk);
+                        if (!dontChoose.contains(pk)) {
+                            canPick.add(pk);
+                        }
                     }
+                }
+                if (expandRounds > 18) {
+                    // Just remove all restrictions and try again if we can't find a reasonable viable pokemon
+                    pickFrom = cachedAllList;
+                    type = null;
+                    expandRounds = 0;
+
                 }
                 minTarget -= currentBST / 20;
                 maxTarget += currentBST / 20;

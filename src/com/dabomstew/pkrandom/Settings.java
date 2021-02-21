@@ -168,12 +168,14 @@ public class Settings {
     private boolean trainersBlockEarlyWonderGuard = true;
     private boolean trainersEnforceDistribution;
     private boolean trainersEnforceMainPlaythrough;
+    private boolean trainersNoDuplicatePokemon;
     private boolean randomizeTrainerNames;
     private boolean randomizeTrainerClassNames;
     private boolean trainersForceFullyEvolved;
     private int trainersForceFullyEvolvedLevel = 30;
     private boolean trainersLevelModified;
     private int trainersLevelModifier = 0; // -50 ~ 50
+    private boolean trainerBossBoost = false;
     private boolean allowTrainerAlternateFormes;
     private boolean swapTrainerMegaEvos;
     private int additionalBossTrainerPokemon = 0;
@@ -549,7 +551,8 @@ public class Settings {
         out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
 
         // 48 more extra stuff
-        out.write(makeByteSelected(tutorEvolutionSanity, retainNumberOfAbilities));
+        out.write(makeByteSelected(tutorEvolutionSanity, retainNumberOfAbilities,
+                trainersNoDuplicatePokemon, trainerBossBoost));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -819,10 +822,13 @@ public class Settings {
 
         settings.setSelectedEXPCurve(ExpCurve.fromByte(data[46]));
 
-        settings.setTutorEvolutionSanity(restoreState(data[48], 0));
-        settings.setRetainNumberOfAbilities(restoreState(data[48], 1));
         settings.setStaticLevelModified(restoreState(data[47],7));
         settings.setStaticLevelModifier((data[47] & 0x7F) - 50);
+
+        settings.setTutorEvolutionSanity(restoreState(data[48], 0));
+        settings.setRetainNumberOfAbilities(restoreState(data[48], 1));
+        settings.setTrainersNoDuplicatePokemon(restoreState(data[48], 2));
+        settings.setTrainerBossBoost(restoreState(data[48], 3));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1575,6 +1581,22 @@ public class Settings {
 
     public void setTrainersLevelModifier(int trainersLevelModifier) {
         this.trainersLevelModifier = trainersLevelModifier;
+    }
+
+    public boolean isTrainersNoDuplicatePokemon() {
+        return trainersNoDuplicatePokemon;
+    }
+
+    public void setTrainersNoDuplicatePokemon(boolean trainersNoDuplicatePokemon) {
+        this.trainersNoDuplicatePokemon = trainersNoDuplicatePokemon;
+    }
+
+    public boolean isTrainerBossBoost() {
+        return trainerBossBoost;
+    }
+
+    public void setTrainerBossBoost(boolean trainerBossBoost) {
+        this.trainerBossBoost = trainerBossBoost;
     }
 
     public boolean isAllowTrainerAlternateFormes() {

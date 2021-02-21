@@ -213,11 +213,12 @@ public interface RomHandler {
     void randomizeTrainerPokes(boolean usePowerLevels, boolean noLegendaries, boolean noEarlyWonderGuard,
                                int levelModifier, boolean distributionSetting, boolean mainPlaythroughSetting,
                                boolean includeFormes, boolean swapMegaEvos, boolean shinyChance,
-                               boolean abilitiesAreRandomized);
+                               boolean abilitiesAreRandomized, boolean noDupes, boolean bossBstBoost);
 
     void typeThemeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
                                boolean noEarlyWonderGuard, int levelModifier, boolean includeFormes,
-                               boolean swapMegaEvos1, boolean shinyChance, boolean abilitiesAreRandomized);
+                               boolean swapMegaEvos1, boolean shinyChance, boolean abilitiesAreRandomized,
+                               boolean noDupes, boolean bossBstBoost);
 
     void rivalCarriesStarter();
 
