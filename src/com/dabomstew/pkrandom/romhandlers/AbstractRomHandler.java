@@ -413,6 +413,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Cache of stats
         // Used if the original stats have been overwritten
         Map<Pokemon, List<Integer>> statsCache = new HashMap<Pokemon, List<Integer>>();
+        Map<Pokemon, String> categoryCache = new HashMap<>();
         for (int i = 0; i < list.size(); i++) {
             Pokemon pkmnToChange = list.get(i);
             Pokemon pkmnToCopyStats = resultList.get(i);
@@ -423,6 +424,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pkmnToChange.spatk, pkmnToChange.spdef, pkmnToChange.speed,
                         pkmnToChange.special
                 ));
+                categoryCache.put(pkmnToChange, pkmnToChange.category);
 
                 // Randomize stats, prioritizing cached values
                 List<Integer> statsCopyList = List.of(
@@ -430,8 +432,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pkmnToCopyStats.spatk, pkmnToCopyStats.spdef, pkmnToCopyStats.speed,
                         pkmnToCopyStats.special
                 );
+                String category = pkmnToCopyStats.category;
                 if (statsCache.containsKey(pkmnToCopyStats)) {
                     statsCopyList = statsCache.get(pkmnToCopyStats);
+                    category = categoryCache.get(pkmnToCopyStats);
                 }
                 pkmnToChange.hp = statsCopyList.get(0);
                 pkmnToChange.attack = statsCopyList.get(1);
@@ -440,6 +444,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 pkmnToChange.spdef = statsCopyList.get(4);
                 pkmnToChange.speed = statsCopyList.get(5);
                 pkmnToChange.special = statsCopyList.get(6);
+                pkmnToChange.category = category;
 
                 // Make a note in the swaps map, for bookkeeping purposes
                 pokemonSwaps.put(pkmnToChange, pkmnToCopyStats);
