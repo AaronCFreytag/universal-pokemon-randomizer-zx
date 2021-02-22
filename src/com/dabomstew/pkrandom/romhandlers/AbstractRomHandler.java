@@ -786,11 +786,15 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (pk != null && pk.evolutionsFrom.size() == 0) {
                 boolean eligible = pk.secondaryType == null;
                 if (eligible) {
-                    // If any final evolution is eligible, the whole line is eligible
+                    // If any final evolution is eligible, go down the line and
+                    // Find other eligible pokemon
                     eligibleMons.add(pk);
                     Pokemon tmp = pk;
                     while (tmp.evolutionsTo.size() > 0) {
                         tmp = tmp.evolutionsTo.get(0).from;
+                        if (tmp.secondaryType != null) {
+                            break;
+                        }
                         eligibleMons.add(tmp);
                     }
                 }
@@ -798,9 +802,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         copyUpEvolutionsHelper(pk -> {
             // Step 1: Basic or Excluded From Copying Pokemon
-            // A Basic/EFC pokemon has a 35% chance of a second type if
-            // it has an evolution that copies type/stats, a 50% chance
-            // otherwise
+            // A Basic/EFC pokemon has a 10% chance of a second type if
+            // it has an evolution, a 30% chance otherwise
             if (eligibleMons.contains(pk)) {
                 double probability = pk.evolutionsFrom.size() > 0 ? 0.1 : 0.3;
                 if (AbstractRomHandler.this.random.nextDouble() < probability) {
@@ -811,8 +814,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }, (evFrom, evTo, toMonIsFinalEvo) -> {
+            // Copy stats from previous evolutions
+            // The final evolution has a 25% chance of getting a new type if no secondary type exists yet
+            // Otherwise, 10% chance
+            // Only copy from the previous evolution if that pokemon is also eligible
             if (eligibleMons.contains(evTo)) {
-                evTo.secondaryType = evFrom.secondaryType;
+                if (eligibleMons.contains(evFrom)) {
+                    evTo.secondaryType = evFrom.secondaryType;
+                }
                 double probability = toMonIsFinalEvo ? 0.25 : 0.1;
                 if (evTo.secondaryType == null && AbstractRomHandler.this.random.nextDouble() < probability) {
                     evTo.secondaryType = randomType();
