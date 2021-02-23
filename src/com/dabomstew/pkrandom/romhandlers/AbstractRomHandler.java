@@ -3096,13 +3096,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // else random
             }
             else {
-                // Primary/None: 45% primary, 30% normal, 25% random
-                if (picked < 0.45) {
+                // Primary/None: 40% primary, 35% normal, 25% random
+                if (picked < 0.40) {
                     return pkmn.primaryType;
                 } else if (picked < 0.75) {
                     // If good damaging move, redistribute normal to other types
                     if (goodDamaging) {
-                        return picked < 0.65 ? pkmn.primaryType : null;
+                        return picked < 0.7 ? pkmn.primaryType : null;
                     }
                     return Type.NORMAL;
                 }
