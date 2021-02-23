@@ -1910,7 +1910,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         .collect(Collectors.toList());
         List<Integer> mainPlaythroughTrainers = getMainPlaythroughTrainers();
 
-        List<Pokemon> banned = this.getBannedFormes();
+        List<Pokemon> banned = new ArrayList<>();
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -2082,7 +2082,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         typeWeightings = new TreeMap<>();
         totalTypeWeighting = 0;
 
-        List<Pokemon> banned = this.getBannedFormes();
+        List<Pokemon> banned = new ArrayList<>();
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -2301,12 +2301,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void onlyChangeTrainerLevels(int levelModifier) {
         List<Trainer> currentTrainers = this.getTrainers();
-        if (levelModifier != 0) {
-            for (Trainer t: currentTrainers) {
-                applyLevelModifierToTrainerPokemon(t, levelModifier);
-            }
-            this.setTrainers(currentTrainers, false);
+        for (Trainer t: currentTrainers) {
+            applyLevelModifierToTrainerPokemon(t, levelModifier);
         }
+        this.setTrainers(currentTrainers, false);
     }
 
     @Override
@@ -5853,7 +5851,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<TotemPokemon> currentTotemPokemon = this.getTotemPokemon();
         List<TotemPokemon> replacements = new ArrayList<>();
         List<Pokemon> banned = this.bannedForStaticPokemon();
-        banned.addAll(this.getBannedFormes());
         if (!abilitiesAreRandomized) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);

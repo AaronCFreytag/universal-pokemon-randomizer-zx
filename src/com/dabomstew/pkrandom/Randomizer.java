@@ -681,6 +681,11 @@ public class Randomizer {
         log.println("Time elapsed: " + (System.currentTimeMillis() - startTime) + "ms");
         log.println("RNG Calls: " + RandomSource.callsSinceSeed());
         log.println("------------------------------------------------------------------");
+        log.println();
+
+        // Diagnostics
+        log.println("--ROM Diagnostics--");
+        romHandler.printRomDiagnostics(log);
 
         // Output showdown files
         writeShowdownLog(showdownLog, romHandler);
