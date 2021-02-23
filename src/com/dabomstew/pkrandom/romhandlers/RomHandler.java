@@ -123,6 +123,8 @@ public interface RomHandler {
     // Returns the swaps that were made, for future use
     Map<Pokemon, Pokemon> swapPokemonStats(boolean evolutionSanity, boolean megaEvolutionSanity);
 
+    void swapPokemonMovesets(Map<Pokemon, Pokemon> swapsToMake);
+
     void swapPokemonEvoMethods(Map<Pokemon, Pokemon> swapsToMake);
 
     // Update base stats to gen6

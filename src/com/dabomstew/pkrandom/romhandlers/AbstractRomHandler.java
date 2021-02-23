@@ -465,6 +465,34 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void swapPokemonMovesets(Map<Pokemon, Pokemon> swapsToMake) {
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
+        Map<Pokemon, List<MoveLearnt>> movesetCache = new HashMap<>();
+        for (Integer pkmnNum : movesets.keySet()) {
+            Pokemon pkmnToChange = findPokemonInPoolWithSpeciesID(mainPokemonListInclFormes, pkmnNum);
+            Pokemon pkmnToCopy = swapsToMake.get(pkmnToChange);
+
+            // Copy current stats to cache before overriding them
+            movesetCache.put(pkmnToChange, movesets.get(pkmnNum));
+
+            if (pkmnToCopy != null) {
+                // Randomize stats, prioritizing cached values
+                if (!movesets.containsKey(pkmnToCopy.number) && pkmnToCopy.formeNumber != 0) {
+                    pkmnToCopy = pkmnToCopy.baseForme;
+                }
+                List<MoveLearnt> newMoveset = movesets.get(pkmnToCopy.number);
+                if (movesetCache.containsKey(pkmnToCopy)) {
+                    newMoveset = movesetCache.get(pkmnToCopy);
+                }
+
+                movesets.put(pkmnNum, newMoveset);
+            }
+        }
+
+        this.setMovesLearnt(movesets);
+    }
+
+    @Override
     public void swapPokemonEvoMethods(Map<Pokemon, Pokemon> swapsToMake) {
         Set<Evolution> changedEvos = new TreeSet<>();
         Map<Pokemon, Evolution> evoInfoCache = new HashMap<Pokemon, Evolution>();

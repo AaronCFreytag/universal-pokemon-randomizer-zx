@@ -1496,6 +1496,17 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pmsEvolutionMovesCheckBox.toolTipText"/>
                     </properties>
                   </component>
+                  <component id="73cdf" class="javax.swing.JCheckBox" binding="pmsSwapMovesLearnedWithCheckBox">
+                    <constraints>
+                      <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pmsSwapMovesLearnedWithCheckBox.name"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pmsSwapMovesLearnedWithCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
             </children>

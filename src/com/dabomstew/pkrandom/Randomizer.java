@@ -281,6 +281,12 @@ public class Randomizer {
         int forceLv1Count = settings.getGuaranteedMoveCount();
         double msGoodDamagingProb = settings.isMovesetsForceGoodDamaging() ? settings.getMovesetsGoodDamagingPercent() / 100.0
                 : 0;
+
+        if (settings.isRandomizeMovesLearnedWithSwap() && pokemonStatSwaps != null) {
+            romHandler.swapPokemonMovesets(pokemonStatSwaps);
+        }
+
+
         if (settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE) {
             romHandler.randomizeMovesLearnt(true, noBrokenMovesetMoves, forceLv1s, forceLv1Count, msGoodDamagingProb,
                     settings.isEvolutionMovesForAll());

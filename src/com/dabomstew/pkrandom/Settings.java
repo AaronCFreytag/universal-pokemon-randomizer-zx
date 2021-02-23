@@ -49,7 +49,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 48;
+    public static final int LENGTH_OF_SETTINGS_DATA = 49;
 
     private CustomNamesSet customNames;
 
@@ -63,6 +63,7 @@ public class Settings {
     private boolean removeTimeBasedEvolutions;
 
     private boolean randomizeEvolutionsWithSwap;
+    private boolean randomizeMovesLearnedWithSwap;
     private boolean raceMode;
     private boolean blockBrokenMoves;
     private boolean limitPokemon;
@@ -552,7 +553,7 @@ public class Settings {
 
         // 48 more extra stuff
         out.write(makeByteSelected(tutorEvolutionSanity, retainNumberOfAbilities,
-                trainersNoDuplicatePokemon, trainerBossBoost));
+                trainersNoDuplicatePokemon, trainerBossBoost, randomizeMovesLearnedWithSwap));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -829,6 +830,7 @@ public class Settings {
         settings.setRetainNumberOfAbilities(restoreState(data[48], 1));
         settings.setTrainersNoDuplicatePokemon(restoreState(data[48], 2));
         settings.setTrainerBossBoost(restoreState(data[48], 3));
+        settings.setRandomizeMovesLearnedWithSwap(restoreState(data[48], 4));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1064,6 +1066,14 @@ public class Settings {
 
     public void setRandomizeEvolutionsWithSwap(boolean randomizeEvolutionsWithSwap) {
         this.randomizeEvolutionsWithSwap = randomizeEvolutionsWithSwap;
+    }
+
+    public boolean isRandomizeMovesLearnedWithSwap() {
+        return randomizeMovesLearnedWithSwap;
+    }
+
+    public void setRandomizeMovesLearnedWithSwap(boolean randomizeMovesLearnedWithSwap) {
+        this.randomizeMovesLearnedWithSwap = randomizeMovesLearnedWithSwap;
     }
 
     public boolean isEvosAllowAltFormes() {
