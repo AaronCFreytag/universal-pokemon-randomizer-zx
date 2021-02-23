@@ -386,7 +386,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Pokemon pkmn = entry.getKey();
                 Pokemon pkmnToStatCopy = entry.getValue();
                 pkmn.copyBaseFormeBaseStats(pkmnToStatCopy);
-                swaps.put(pkmn, pkmnToStatCopy);
+                swaps.put(pkmn, swaps.get(pkmnToStatCopy));
             }
         }
 
@@ -399,7 +399,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Pokemon pk : allPokes) {
             if (pk != null && pk.actuallyCosmetic) {
                 pk.copyBaseFormeBaseStats(pk.baseForme);
-                swaps.put(pk, pk.baseForme);
+                swaps.put(pk, swaps.get(pk.baseForme));
             }
         }
 
@@ -414,6 +414,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Used if the original stats have been overwritten
         Map<Pokemon, List<Integer>> statsCache = new HashMap<Pokemon, List<Integer>>();
         Map<Pokemon, String> categoryCache = new HashMap<>();
+        Map<Pokemon, ExpCurve> expCurveCache = new HashMap<>();
         for (int i = 0; i < list.size(); i++) {
             Pokemon pkmnToChange = list.get(i);
             Pokemon pkmnToCopyStats = resultList.get(i);
@@ -422,20 +423,23 @@ public abstract class AbstractRomHandler implements RomHandler {
                 statsCache.put(pkmnToChange, List.of(
                         pkmnToChange.hp, pkmnToChange.attack, pkmnToChange.defense,
                         pkmnToChange.spatk, pkmnToChange.spdef, pkmnToChange.speed,
-                        pkmnToChange.special
+                        pkmnToChange.special, pkmnToChange.catchRate
                 ));
                 categoryCache.put(pkmnToChange, pkmnToChange.category);
+                expCurveCache.put(pkmnToChange, pkmnToChange.growthCurve);
 
                 // Randomize stats, prioritizing cached values
                 List<Integer> statsCopyList = List.of(
                         pkmnToCopyStats.hp, pkmnToCopyStats.attack, pkmnToCopyStats.defense,
                         pkmnToCopyStats.spatk, pkmnToCopyStats.spdef, pkmnToCopyStats.speed,
-                        pkmnToCopyStats.special
+                        pkmnToCopyStats.special, pkmnToCopyStats.catchRate
                 );
                 String category = pkmnToCopyStats.category;
+                ExpCurve expCurve = pkmnToCopyStats.growthCurve;
                 if (statsCache.containsKey(pkmnToCopyStats)) {
                     statsCopyList = statsCache.get(pkmnToCopyStats);
                     category = categoryCache.get(pkmnToCopyStats);
+                    expCurve = expCurveCache.get(pkmnToCopyStats);
                 }
                 pkmnToChange.hp = statsCopyList.get(0);
                 pkmnToChange.attack = statsCopyList.get(1);
@@ -445,6 +449,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 pkmnToChange.speed = statsCopyList.get(5);
                 pkmnToChange.special = statsCopyList.get(6);
                 pkmnToChange.category = category;
+                pkmnToChange.growthCurve = expCurve;
+                pkmnToChange.catchRate = statsCopyList.get(7);
 
                 // Make a note in the swaps map, for bookkeeping purposes
                 pokemonSwaps.put(pkmnToChange, pkmnToCopyStats);
@@ -480,9 +486,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (!movesets.containsKey(pkmnToCopy.number) && pkmnToCopy.formeNumber != 0) {
                     pkmnToCopy = pkmnToCopy.baseForme;
                 }
-                List<MoveLearnt> newMoveset = movesets.get(pkmnToCopy.number);
+                List<MoveLearnt> newMoveset = new ArrayList<MoveLearnt>();
+                List<MoveLearnt> movesetToCopy = movesets.get(pkmnToCopy.number);
                 if (movesetCache.containsKey(pkmnToCopy)) {
-                    newMoveset = movesetCache.get(pkmnToCopy);
+                    movesetToCopy = movesetCache.get(pkmnToCopy);
+                }
+                for (int i = 0; i < movesetToCopy.size(); i++) {
+                    newMoveset.add(movesetToCopy.get(i));
                 }
 
                 movesets.put(pkmnNum, newMoveset);
