@@ -54,6 +54,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> giratinaPicks;
     private Map<Pokemon, Integer> placementHistory = new HashMap<>();
     private Map<Integer, Integer> itemPlacementHistory = new HashMap<>();
+    private Map<Pokemon, Integer> originalBstCache = new HashMap<>();
     boolean ptGiratina = false;
     boolean isORAS = false;
     boolean isSM = false;
@@ -425,6 +426,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pkmnToChange.spatk, pkmnToChange.spdef, pkmnToChange.speed,
                         pkmnToChange.special, pkmnToChange.catchRate
                 ));
+                // Also copy the BST for future randomization purposes
+                originalBstCache.put(pkmnToChange, pkmnToChange.bstForPowerLevels());
+
                 categoryCache.put(pkmnToChange, pkmnToChange.category);
                 expCurveCache.put(pkmnToChange, pkmnToChange.growthCurve);
 
@@ -5022,7 +5026,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     private Pokemon pickEvoPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current) {
         // start with within 10% and add 5% either direction till we find
         // something
-        int currentBST = current.bstForPowerLevels();
+        if (!originalBstCache.containsKey(current)) {
+            originalBstCache.put(current, current.bstForPowerLevels());
+        }
+        int currentBST = originalBstCache.get(current);
         int minTarget = currentBST - currentBST / 10;
         int maxTarget = currentBST + currentBST / 10;
         List<Pokemon> canPick = new ArrayList<>();
@@ -5619,7 +5626,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (usePowerLevels) {
             // start with within 10% and add 5% either direction till we find
             // something
-            int currentBST = current.bstForPowerLevels();
+            if (!originalBstCache.containsKey(current)) {
+                originalBstCache.put(current, current.bstForPowerLevels());
+            }
+            int currentBST = originalBstCache.get(current);
             int minTarget = currentBST - currentBST / 10;
             int maxTarget = currentBST + currentBST / 10;
             if (boostBst) {
@@ -5687,7 +5697,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         // start with within 10% and add 5% either direction till we find
         // something
         int balancedBST = bstBalanceLevel * 10 + 250;
-        int currentBST = Math.min(current.bstForPowerLevels(), balancedBST);
+        if (!originalBstCache.containsKey(current)) {
+            originalBstCache.put(current, current.bstForPowerLevels());
+        }
+        int currentBST = Math.min(originalBstCache.get(current), balancedBST);
         int minTarget = currentBST - currentBST / 10;
         int maxTarget = currentBST + currentBST / 10;
         List<Pokemon> canPick = new ArrayList<>();
@@ -5763,7 +5776,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                                                 List<Pokemon> usedUp, boolean limitBST) {
         // start with within 10% and add 5% either direction till we find
         // something
-        int currentBST = current.bstForPowerLevels();
+        if (!originalBstCache.containsKey(current)) {
+            originalBstCache.put(current, current.bstForPowerLevels());
+        }
+        int currentBST = originalBstCache.get(current);
         int minTarget = limitBST ? currentBST - currentBST / 5 : currentBST - currentBST / 10;
         int maxTarget = limitBST ? currentBST : currentBST + currentBST / 10;
         List<Pokemon> canPick = new ArrayList<>();
