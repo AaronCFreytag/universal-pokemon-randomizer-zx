@@ -3183,12 +3183,17 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void orderDamagingMovesByDamage() {
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
         List<Move> allMoves = this.getMoves();
-        for (Integer pkmn : movesets.keySet()) {
-            List<MoveLearnt> moves = movesets.get(pkmn);
+        for (Integer pkmnID : movesets.keySet()) {
+            List<MoveLearnt> moves = movesets.get(pkmnID);
+            Pokemon pkmn = findPokemonInPoolWithSpeciesID(mainPokemonListInclFormes, pkmnID);
 
             // Build up a list of damaging moves and their positions
             List<Integer> damagingMoveIndices = new ArrayList<>();
             List<Move> damagingMoves = new ArrayList<>();
+            Map<Integer, Double> moveValueAdjustment = new TreeMap<>();
+
+            double specialRatio = Math.sqrt(pkmn.spatk) / Math.sqrt(pkmn.attack);
+
             for (int i = 0; i < moves.size(); i++) {
                 if (moves.get(i).level == 0) continue; // Don't reorder evolution move
                 Move mv = allMoves.get(moves.get(i).move);
@@ -3196,14 +3201,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                     // considered a damaging move for this purpose
                     damagingMoveIndices.add(i);
                     damagingMoves.add(mv);
+                    double powerValue = valueMove(mv, specialRatio);
+                    double val = this.random.nextDouble() * powerValue - powerValue * 0.5;
+                    moveValueAdjustment.put(mv.number, val);
                 }
             }
 
             // Ties should be sorted randomly, so shuffle the list first.
             Collections.shuffle(damagingMoves, random);
 
+
             // Sort the damaging moves by power
-            damagingMoves.sort(Comparator.comparingDouble(m -> m.power * m.hitCount));
+            damagingMoves.sort(Comparator.comparingDouble(m -> {
+                double powerValue = valueMove(m, specialRatio);
+                return powerValue + moveValueAdjustment.get(m.number);
+            }));
 
             // Reassign damaging moves in the ordered positions
             for (int i = 0; i < damagingMoves.size(); i++) {
@@ -3213,6 +3225,15 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Done, save
         this.setMovesLearnt(movesets);
+    }
+
+    private double valueMove(Move mv, double specialRatio) {
+        double movePowerValue = Math.min(mv.power * mv.hitCount, 150);
+        if (mv.type == Type.NORMAL) {
+            movePowerValue *= 0.8;
+        }
+        double ratio = mv.category == MoveCategory.SPECIAL ? specialRatio : 1 / specialRatio;
+        return movePowerValue + 0.00002 * Math.pow(movePowerValue * ratio, 3);
     }
 
     @Override
