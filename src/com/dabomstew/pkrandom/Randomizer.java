@@ -555,8 +555,6 @@ public class Randomizer {
 
         maybeLogTMHMCompatibility(log, romHandler);
 
-        maybeLogTMHMCompatibility(log, romHandler);
-
         // Move Tutors (new 1.0.3)
         if (romHandler.hasMoveTutors()) {
             boolean noBrokenTutorMoves = settings.isBlockBrokenTutorMoves();

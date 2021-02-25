@@ -2484,20 +2484,9 @@
                           <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmRandomRadioButton.toolTipText"/>
                         </properties>
                       </component>
-                      <component id="b7d85" class="javax.swing.JCheckBox" binding="tmFullHMCompatibilityCheckBox">
-                        <constraints>
-                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <enabled value="false"/>
-                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmFullHMCompatibilityCheckBox.text"/>
-                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmFullHMCompatibilityCheckBox.toolTipText"/>
-                        </properties>
-                      </component>
                       <component id="e94bb" class="javax.swing.JCheckBox" binding="tmNoGameBreakingMovesCheckBox">
                         <constraints>
-                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -2508,7 +2497,7 @@
                       </component>
                       <component id="60c91" class="javax.swing.JSlider" binding="tmForceGoodDamagingSlider" default-binding="true">
                         <constraints>
-                          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -2522,26 +2511,26 @@
                           <value value="0"/>
                         </properties>
                       </component>
-                      <component id="39544" class="javax.swing.JCheckBox" binding="tmForceGoodDamagingCheckBox" default-binding="true">
-                        <constraints>
-                          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <enabled value="false"/>
-                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmForceGoodDamagingCheckBox.text"/>
-                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmForceGoodDamagingCheckBox.toolTipText"/>
-                        </properties>
-                      </component>
                       <component id="e66ed" class="javax.swing.JCheckBox" binding="tmKeepFieldMoveTMsCheckBox">
                         <constraints>
-                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
                           <enabled value="false"/>
                           <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmKeepFieldMoveTMsCheckBox.text"/>
                           <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmKeepFieldMoveTMsCheckBox.toolTipText"/>
+                        </properties>
+                      </component>
+                      <component id="39544" class="javax.swing.JCheckBox" binding="tmForceGoodDamagingCheckBox" default-binding="true">
+                        <constraints>
+                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <gridbag weightx="0.0" weighty="0.0"/>
+                        </constraints>
+                        <properties>
+                          <enabled value="false"/>
+                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmForceGoodDamagingCheckBox.text"/>
+                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmForceGoodDamagingCheckBox.toolTipText"/>
                         </properties>
                       </component>
                     </children>
@@ -2660,6 +2649,17 @@
                           <enabled value="false"/>
                           <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmLevelupMoveSanityCheckBox.text"/>
                           <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmLevelupMoveSanityCheckBox.toolTipText"/>
+                        </properties>
+                      </component>
+                      <component id="b7d85" class="javax.swing.JCheckBox" binding="tmFullHMCompatibilityCheckBox">
+                        <constraints>
+                          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <gridbag weightx="0.0" weighty="0.0"/>
+                        </constraints>
+                        <properties>
+                          <enabled value="false"/>
+                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmFullHMCompatibilityCheckBox.text"/>
+                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tmFullHMCompatibilityCheckBox.toolTipText"/>
                         </properties>
                       </component>
                     </children>

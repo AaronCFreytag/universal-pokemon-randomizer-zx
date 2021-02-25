@@ -3776,8 +3776,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 double probability = 0.25;
                 if (preferSameType) {
                     probability = 0.05;
-                    if (mv.type.equals(evTo.primaryType) && !evTo.primaryType.equals(evFrom.primaryType)
-                            || mv.type.equals(evTo.secondaryType) && !evTo.secondaryType.equals(evFrom.secondaryType)) {
+                    if (evTo.primaryType.equals(mv.type)
+                            && !evTo.primaryType.equals(evFrom.primaryType) && !evTo.primaryType.equals(evFrom.secondaryType)
+                            || evTo.secondaryType != null && evTo.secondaryType.equals(mv.type)
+                            && !evTo.secondaryType.equals(evFrom.secondaryType) && !evTo.secondaryType.equals(evFrom.primaryType)) {
                         probability = 0.9;
                     }
                 }
@@ -3853,7 +3855,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 1; i < toCompat.length; i++) {
                 toCompat[i] |= fromCompat[i];
             }
-        }), false);
+        }), true);
         this.setTMHMCompatibility(compat);
     }
 
@@ -4033,7 +4035,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 1; i < toCompat.length; i++) {
                 toCompat[i] |= fromCompat[i];
             }
-        }), false);
+        }), true);
         this.setMoveTutorCompatibility(compat);
     }
 
