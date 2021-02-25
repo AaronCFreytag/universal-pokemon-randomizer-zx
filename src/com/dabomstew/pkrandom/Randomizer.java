@@ -514,14 +514,13 @@ public class Randomizer {
 
         if (settings.isTmLevelUpMoveSanity()) {
             romHandler.ensureTMCompatSanity();
+            if (settings.isTmsEvolutionSanity()) {
+                romHandler.ensureTMEvolutionSanity();
+            }
         }
 
         if (settings.isFullHMCompat()) {
             romHandler.fullHMCompatibility();
-        }
-
-        if (settings.isTmsEvolutionSanity()) {
-            romHandler.ensureTMEvolutionSanity();
         }
 
         maybeLogTMHMCompatibility(log, romHandler);
@@ -566,11 +565,11 @@ public class Randomizer {
 
             if (settings.isTutorLevelUpMoveSanity()) {
                 romHandler.ensureMoveTutorCompatSanity();
+                if (settings.isTutorEvolutionSanity()) {
+                    romHandler.ensureMoveTutorEvolutionSanity();
+                }
             }
 
-            if (settings.isTutorEvolutionSanity()) {
-                romHandler.ensureMoveTutorEvolutionSanity();
-            }
 
             maybeLogTutorCompatibility(log, romHandler);
         }

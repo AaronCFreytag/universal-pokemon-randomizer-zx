@@ -46,7 +46,7 @@ public class RomFunctions {
             if (pkmn != null) {
                 if (pkmn.evolutionsTo.size() < 1) {
                     basicPokemon.add(pkmn);
-                } else if (!includeNonCopyingMons) {
+                } else if (includeNonCopyingMons) {
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
                     if (!onlyEvo.carryStats) {
                         basicPokemon.add(pkmn);
