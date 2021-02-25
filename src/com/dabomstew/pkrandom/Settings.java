@@ -242,7 +242,7 @@ public class Settings {
     private boolean tmsForceGoodDamaging;
     private int tmsGoodDamagingPercent = 0;
     private boolean blockBrokenTMMoves;
-    private boolean tmsEvolutionSanity;
+    private boolean tmsFollowEvolutions;
 
     public enum TMsHMsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -260,7 +260,7 @@ public class Settings {
     private boolean tutorsForceGoodDamaging;
     private int tutorsGoodDamagingPercent = 0;
     private boolean blockBrokenTutorMoves;
-    private boolean tutorEvolutionSanity;
+    private boolean tutorFollowEvolutions;
 
     public enum MoveTutorsCompatibilityMod {
         UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
@@ -545,7 +545,7 @@ public class Settings {
 
         out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
 
-        out.write(makeByteSelected(tmsEvolutionSanity, tutorEvolutionSanity));
+        out.write(makeByteSelected(tmsFollowEvolutions, tutorFollowEvolutions));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -814,8 +814,8 @@ public class Settings {
         settings.setStaticLevelModified(restoreState(data[47],7));
         settings.setStaticLevelModifier((data[47] & 0x7F) - 50);
 
-        settings.setTmsEvolutionSanity(restoreState(data[48], 0));
-        settings.setTutorEvolutionSanity(restoreState(data[48], 1));
+        settings.setTmsFollowEvolutions(restoreState(data[48], 0));
+        settings.setTutorFollowEvolutions(restoreState(data[48], 1));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1915,12 +1915,12 @@ public class Settings {
         this.tmsHmsCompatibilityMod = tmsHmsCompatibilityMod;
     }
 
-    public boolean isTmsEvolutionSanity() {
-        return tmsEvolutionSanity;
+    public boolean isTmsFollowEvolutions() {
+        return tmsFollowEvolutions;
     }
 
-    public void setTmsEvolutionSanity(boolean tmsEvolutionSanity) {
-        this.tmsEvolutionSanity = tmsEvolutionSanity;
+    public void setTmsFollowEvolutions(boolean tmsFollowEvolutions) {
+        this.tmsFollowEvolutions = tmsFollowEvolutions;
     }
 
     public MoveTutorMovesMod getMoveTutorMovesMod() {
@@ -1987,12 +1987,12 @@ public class Settings {
         this.moveTutorsCompatibilityMod = moveTutorsCompatibilityMod;
     }
 
-    public boolean isTutorEvolutionSanity() {
-        return tutorEvolutionSanity;
+    public boolean isTutorFollowEvolutions() {
+        return tutorFollowEvolutions;
     }
 
-    public void setTutorEvolutionSanity(boolean tutorEvolutionSanity) {
-        this.tutorEvolutionSanity = tutorEvolutionSanity;
+    public void setTutorFollowEvolutions(boolean tutorFollowEvolutions) {
+        this.tutorFollowEvolutions = tutorFollowEvolutions;
     }
 
     public InGameTradesMod getInGameTradesMod() {

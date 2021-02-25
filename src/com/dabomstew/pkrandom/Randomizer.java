@@ -500,10 +500,10 @@ public class Randomizer {
         // TM/HM compatibility
         switch (settings.getTmsHmsCompatibilityMod()) {
         case RANDOM_PREFER_TYPE:
-            romHandler.randomizeTMHMCompatibility(true, settings.isTmsEvolutionSanity());
+            romHandler.randomizeTMHMCompatibility(true, settings.isTmsFollowEvolutions());
             break;
         case COMPLETELY_RANDOM:
-            romHandler.randomizeTMHMCompatibility(false, settings.isTmsEvolutionSanity());
+            romHandler.randomizeTMHMCompatibility(false, settings.isTmsFollowEvolutions());
             break;
         case FULL:
             romHandler.fullTMHMCompatibility();
@@ -514,7 +514,7 @@ public class Randomizer {
 
         if (settings.isTmLevelUpMoveSanity()) {
             romHandler.ensureTMCompatSanity();
-            if (settings.isTmsEvolutionSanity()) {
+            if (settings.isTmsFollowEvolutions()) {
                 romHandler.ensureTMEvolutionSanity();
             }
         }
@@ -551,10 +551,10 @@ public class Randomizer {
             // Compatibility
             switch (settings.getMoveTutorsCompatibilityMod()) {
             case RANDOM_PREFER_TYPE:
-                romHandler.randomizeMoveTutorCompatibility(true, settings.isTutorEvolutionSanity());
+                romHandler.randomizeMoveTutorCompatibility(true, settings.isTutorFollowEvolutions());
                 break;
             case COMPLETELY_RANDOM:
-                romHandler.randomizeMoveTutorCompatibility(false, settings.isTutorEvolutionSanity());
+                romHandler.randomizeMoveTutorCompatibility(false, settings.isTutorFollowEvolutions());
                 break;
             case FULL:
                 romHandler.fullMoveTutorCompatibility();
@@ -565,7 +565,7 @@ public class Randomizer {
 
             if (settings.isTutorLevelUpMoveSanity()) {
                 romHandler.ensureMoveTutorCompatSanity();
-                if (settings.isTutorEvolutionSanity()) {
+                if (settings.isTutorFollowEvolutions()) {
                     romHandler.ensureMoveTutorEvolutionSanity();
                 }
             }
