@@ -3329,7 +3329,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
             (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
                     evFrom, evTo, compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType
-            ), false);
+            ), true);
         }
         else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
@@ -3564,7 +3564,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pk, compat.get(pk), mts, priorityTutors, preferSameType),
                     (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
                             evFrom, evTo, compat.get(evFrom), compat.get(evTo), mts, preferSameType
-                    ), false);
+                    ), true);
         }
         else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {

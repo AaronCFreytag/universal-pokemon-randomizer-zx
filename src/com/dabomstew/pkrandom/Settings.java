@@ -49,7 +49,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 48;
+    public static final int LENGTH_OF_SETTINGS_DATA = 49;
 
     private CustomNamesSet customNames;
 
@@ -545,6 +545,8 @@ public class Settings {
 
         out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
 
+        out.write(makeByteSelected(tmsEvolutionSanity, tutorEvolutionSanity));
+
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -811,6 +813,9 @@ public class Settings {
 
         settings.setStaticLevelModified(restoreState(data[47],7));
         settings.setStaticLevelModifier((data[47] & 0x7F) - 50);
+
+        settings.setTmsEvolutionSanity(restoreState(data[48], 0));
+        settings.setTutorEvolutionSanity(restoreState(data[48], 1));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
