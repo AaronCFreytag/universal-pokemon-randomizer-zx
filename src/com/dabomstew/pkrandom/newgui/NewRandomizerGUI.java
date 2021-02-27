@@ -286,6 +286,8 @@ public class NewRandomizerGUI {
     private JCheckBox tpNoDuplicatePokemon;
     private JCheckBox tpBossBoost;
     private JCheckBox pmsSwapMovesLearnedWithCheckBox;
+    private JCheckBox wpDevolveIllegalEvos;
+    private JCheckBox stpDevolveIllegalPokemon;
 
     private static JFrame frame;
 
@@ -1434,6 +1436,7 @@ public class NewRandomizerGUI {
         wpPercentageLevelModifierCheckBox.setSelected(settings.isWildLevelsModified());
         wpPercentageLevelModifierSlider.setValue(settings.getWildLevelModifier());
         wpAllowAltFormesCheckBox.setSelected(settings.isAllowWildAltFormes());
+        wpDevolveIllegalEvos.setSelected(settings.isDevolveIllegalWildPokemon());
 
         stpUnchangedRadioButton.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
         stpSwapLegendariesSwapStandardsRadioButton.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING);
@@ -1447,6 +1450,7 @@ public class NewRandomizerGUI {
         stpSwapMegaEvosCheckBox.setSelected(settings.isSwapStaticMegaEvos());
         stpPercentageLevelModifierCheckBox.setSelected(settings.isStaticLevelModified());
         stpPercentageLevelModifierSlider.setValue(settings.getStaticLevelModifier());
+        stpDevolveIllegalPokemon.setSelected(settings.isDevolveIllegalStaticPokemon());
 
         thcRandomCompletelyRadioButton
                 .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.COMPLETELY_RANDOM);
@@ -1643,6 +1647,7 @@ public class NewRandomizerGUI {
         settings.setWildLevelsModified(wpPercentageLevelModifierCheckBox.isSelected());
         settings.setWildLevelModifier(wpPercentageLevelModifierSlider.getValue());
         settings.setAllowWildAltFormes(wpAllowAltFormesCheckBox.isSelected() && wpAllowAltFormesCheckBox.isVisible());
+        settings.setDevolveIllegalWildPokemon(wpDevolveIllegalEvos.isSelected());
 
         settings.setStaticPokemonMod(stpUnchangedRadioButton.isSelected(), stpSwapLegendariesSwapStandardsRadioButton.isSelected(),
                 stpRandomCompletelyRadioButton.isSelected(), stpRandomSimilarStrengthRadioButton.isSelected());
@@ -1652,6 +1657,7 @@ public class NewRandomizerGUI {
         settings.setSwapStaticMegaEvos(stpSwapMegaEvosCheckBox.isSelected() && stpSwapMegaEvosCheckBox.isVisible());
         settings.setStaticLevelModified(stpPercentageLevelModifierCheckBox.isSelected());
         settings.setStaticLevelModifier(stpPercentageLevelModifierSlider.getValue());
+        settings.setDevolveIllegalStaticPokemon(stpDevolveIllegalPokemon.isSelected());
 
         settings.setTmsMod(tmUnchangedRadioButton.isSelected(), tmRandomRadioButton.isSelected());
 
@@ -2014,6 +2020,9 @@ public class NewRandomizerGUI {
         stpSwapMegaEvosCheckBox.setVisible(true);
         stpSwapMegaEvosCheckBox.setEnabled(false);
         stpSwapMegaEvosCheckBox.setSelected(false);
+        stpDevolveIllegalPokemon.setVisible(true);
+        stpDevolveIllegalPokemon.setEnabled(false);
+        stpDevolveIllegalPokemon.setSelected(false);
         igtUnchangedRadioButton.setVisible(true);
         igtUnchangedRadioButton.setEnabled(false);
         igtUnchangedRadioButton.setSelected(false);
@@ -2271,6 +2280,9 @@ public class NewRandomizerGUI {
         wpAllowAltFormesCheckBox.setVisible(true);
         wpAllowAltFormesCheckBox.setEnabled(false);
         wpAllowAltFormesCheckBox.setSelected(false);
+        wpDevolveIllegalEvos.setVisible(true);
+        wpDevolveIllegalEvos.setEnabled(false);
+        wpDevolveIllegalEvos.setSelected(false);
         tmUnchangedRadioButton.setVisible(true);
         tmUnchangedRadioButton.setEnabled(false);
         tmUnchangedRadioButton.setSelected(false);
@@ -2562,6 +2574,8 @@ public class NewRandomizerGUI {
                 stpPercentageLevelModifierCheckBox.setEnabled(pokemonGeneration >= 3);
                 stpPercentageLevelModifierSlider.setVisible(pokemonGeneration >= 3);
                 stpPercentageLevelModifierSlider.setEnabled(false);
+                stpDevolveIllegalPokemon.setVisible(true);
+                stpDevolveIllegalPokemon.setEnabled(false);
             } else {
                 stpSwapLegendariesSwapStandardsRadioButton.setVisible(false);
                 stpRandomCompletelyRadioButton.setVisible(false);
@@ -2570,6 +2584,7 @@ public class NewRandomizerGUI {
                 stpLimitMusketeersCheckBox.setVisible(false);
                 stpPercentageLevelModifierCheckBox.setVisible(false);
                 stpPercentageLevelModifierSlider.setVisible(false);
+                stpDevolveIllegalPokemon.setVisible(false);
             }
 
             igtUnchangedRadioButton.setEnabled(true);
@@ -2919,11 +2934,14 @@ public class NewRandomizerGUI {
             stpAllowAltFormesCheckBox.setSelected(false);
             stpSwapMegaEvosCheckBox.setEnabled(false);
             stpSwapMegaEvosCheckBox.setSelected(false);
+            stpDevolveIllegalPokemon.setEnabled(false);
+            stpDevolveIllegalPokemon.setSelected(false);
         } else {
             stpLimitMusketeersCheckBox.setEnabled(true);
             stpRandomize600BSTCheckBox.setEnabled(true);
             stpAllowAltFormesCheckBox.setEnabled(true);
             stpSwapMegaEvosCheckBox.setEnabled(true);
+            stpDevolveIllegalPokemon.setEnabled(true);
         }
 
         if (stpPercentageLevelModifierCheckBox.isSelected()) {
@@ -3130,10 +3148,13 @@ public class NewRandomizerGUI {
             wpDontUseLegendariesCheckBox.setSelected(false);
             wpAllowAltFormesCheckBox.setEnabled(false);
             wpAllowAltFormesCheckBox.setSelected(false);
+            wpDevolveIllegalEvos.setEnabled(false);
+            wpDevolveIllegalEvos.setSelected(false);
         } else {
             wpUseTimeBasedEncountersCheckBox.setEnabled(true);
             wpDontUseLegendariesCheckBox.setEnabled(true);
             wpAllowAltFormesCheckBox.setEnabled(true);
+            wpDevolveIllegalEvos.setEnabled(true);
         }
 
         if (wpRandomizeHeldItemsCheckBox.isSelected()

@@ -497,6 +497,13 @@ public class Randomizer {
             break;
         }
 
+        if (settings.isDevolveIllegalWildPokemon()) {
+            romHandler.devolveInvalidWildEncounters(
+                    settings.isUseTimeBasedEncounters(),
+                    settings.getWildPokemonMod() == Settings.WildPokemonMod.AREA_MAPPING
+            );
+        }
+
         maybeLogWildPokemonChanges(log, romHandler);
         boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
                 (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
@@ -1034,6 +1041,9 @@ public class Randomizer {
                         settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
             } else if (settings.isStaticLevelModified()) {
                 romHandler.onlyChangeStaticLevels(settings.getStaticLevelModifier());
+            }
+            if (settings.isDevolveIllegalStaticPokemon()) {
+                romHandler.devolveInvalidStaticPokemon();
             }
             List<StaticEncounter> newStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED && !settings.isStaticLevelModified()) {

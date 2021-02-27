@@ -946,7 +946,7 @@
                   </hspacer>
                   <vspacer id="ec4fb">
                     <constraints>
-                      <grid row="5" column="1" row-span="1" col-span="3" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="6" column="1" row-span="1" col-span="3" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -1065,6 +1065,18 @@
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpLimitMusketeersCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpLimitMusketeersCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="5d75b" class="javax.swing.JCheckBox" binding="stpDevolveIllegalPokemon">
+                    <constraints>
+                      <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <hideActionText value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpDevolveIllegalPokemon.name"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.stpDevolveIllegalPokemon.toolTipText"/>
                     </properties>
                   </component>
                 </children>
@@ -2387,6 +2399,17 @@
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpAllowAltFormesCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpAllowAltFormesCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="1663b" class="javax.swing.JCheckBox" binding="wpDevolveIllegalEvos">
+                    <constraints>
+                      <grid row="5" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpDevolveIllegalEvos.name"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpDevolveIllegalEvos.toolTipText"/>
                     </properties>
                   </component>
                 </children>

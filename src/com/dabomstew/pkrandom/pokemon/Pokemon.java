@@ -287,4 +287,20 @@ public class Pokemon implements Comparable<Pokemon> {
         return realCosmeticFormNumbers.isEmpty() ? num : realCosmeticFormNumbers.get(num);
     }
 
+    public Pokemon getValidPreevoAtLevel(int level) {
+        Pokemon validPokemon = this;
+        Pokemon pkmn = this;
+        if (this.formeNumber != 0 && this.evolutionsTo.size() == 0
+                && this.baseForme.evolutionsTo.size() != 0) {
+            pkmn = this.baseForme;
+        }
+        while (pkmn.evolutionsTo.size() > 0) {
+            Evolution evo = pkmn.evolutionsTo.get(0);
+            if ((evo.type.usesLevel() && level < evo.extraInfo) || level < evo.level) {
+                validPokemon = evo.from;
+            }
+            pkmn = evo.from;
+        }
+        return validPokemon;
+    }
 }

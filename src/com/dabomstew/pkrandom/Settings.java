@@ -206,6 +206,8 @@ public class Settings {
     private int wildLevelModifier = 0;
     private boolean allowWildAltFormes;
 
+    private boolean devolveIllegalWildPokemon;
+
     public enum StaticPokemonMod {
         UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM, SIMILAR_STRENGTH
     }
@@ -216,6 +218,7 @@ public class Settings {
     private boolean swapStaticMegaEvos;
     private boolean staticLevelModified;
     private int staticLevelModifier = 0; // -50 ~ 50
+    private boolean devolveIllegalStaticPokemon;
 
     public enum TotemPokemonMod {
         UNCHANGED, RANDOM, SIMILAR_STRENGTH
@@ -553,7 +556,8 @@ public class Settings {
 
         // 48 more extra stuff
         out.write(makeByteSelected(tmsFollowEvolutions, tutorFollowEvolutions, retainNumberOfAbilities,
-                trainersNoDuplicatePokemon, trainerBossBoost, randomizeMovesLearnedWithSwap));
+                trainersNoDuplicatePokemon, trainerBossBoost, randomizeMovesLearnedWithSwap, devolveIllegalWildPokemon,
+                devolveIllegalStaticPokemon));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -831,6 +835,8 @@ public class Settings {
         settings.setTrainersNoDuplicatePokemon(restoreState(data[48], 3));
         settings.setTrainerBossBoost(restoreState(data[48], 4));
         settings.setRandomizeMovesLearnedWithSwap(restoreState(data[48], 5));
+        settings.setDevolveIllegalWildPokemon(restoreState(data[48], 6));
+        settings.setDevolveIllegalStaticPokemon(restoreState(data[48], 7));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1769,6 +1775,14 @@ public class Settings {
         this.allowWildAltFormes = allowWildAltFormes;
     }
 
+    public boolean isDevolveIllegalWildPokemon() {
+        return devolveIllegalWildPokemon;
+    }
+
+    public void setDevolveIllegalWildPokemon(boolean devolveIllegalWildPokemon) {
+        this.devolveIllegalWildPokemon = devolveIllegalWildPokemon;
+    }
+
     public StaticPokemonMod getStaticPokemonMod() {
         return staticPokemonMod;
     }
@@ -1827,6 +1841,14 @@ public class Settings {
 
     public void setStaticLevelModifier(int staticLevelModifier) {
         this.staticLevelModifier = staticLevelModifier;
+    }
+
+    public boolean isDevolveIllegalStaticPokemon() {
+        return devolveIllegalStaticPokemon;
+    }
+
+    public void setDevolveIllegalStaticPokemon(boolean devolveIllegalStaticPokemon) {
+        this.devolveIllegalStaticPokemon = devolveIllegalStaticPokemon;
     }
 
     public TotemPokemonMod getTotemPokemonMod() {

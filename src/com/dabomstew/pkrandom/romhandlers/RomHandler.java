@@ -205,6 +205,8 @@ public interface RomHandler {
 
     List<Pokemon> bannedForWildEncounters();
 
+    void devolveInvalidWildEncounters(boolean useTimeOfDay, boolean areaEncounters);
+
     // Randomizer: trainer pokemon
     List<Trainer> getTrainers();
 
@@ -292,6 +294,8 @@ public interface RomHandler {
     boolean forceSwapStaticMegaEvos();
 
     void onlyChangeStaticLevels(int levelModifier);
+
+    void devolveInvalidStaticPokemon();
 
     // Randomizer: Totem Pokemon
 

@@ -1246,6 +1246,39 @@ public abstract class AbstractRomHandler implements RomHandler {
         setEncounters(useTimeOfDay, currentEncounters);
     }
 
+    public void devolveInvalidWildEncounters(boolean useTimeOfDay, boolean areaEncounters) {
+        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+        for (EncounterSet area : currentEncounters) {
+            if (areaEncounters) {
+                // With area encounters enabled, do everything twice; Once in a pass to find what
+                // needs to be changed and another to update the encounters in the are
+                Map<Pokemon, Integer> lowestLevel = new TreeMap<>();
+                for (Encounter enc : area.encounters) {
+                    if (!lowestLevel.containsKey(enc.pokemon) || lowestLevel.get(enc.pokemon) > enc.level) {
+                        lowestLevel.put(enc.pokemon, enc.level);
+                    }
+                }
+                for (Encounter enc : area.encounters) {
+                    enc.pokemon = enc.pokemon.getValidPreevoAtLevel(enc.level);
+                }
+            } else {
+                // Just do things in one loop with area encounters disabled
+                for (Encounter enc : area.encounters) {
+                    enc.pokemon = enc.pokemon.getValidPreevoAtLevel(enc.level);
+                }
+            }
+        }
+        this.setEncounters(useTimeOfDay, currentEncounters);
+    }
+
+    public void devolveInvalidStaticPokemon() {
+        List<StaticEncounter> currentStaticPokemon = this.getStaticPokemon();
+        for (StaticEncounter enc : currentStaticPokemon) {
+            enc.pkmn = enc.pkmn.getValidPreevoAtLevel(enc.level);
+        }
+        this.setStaticPokemon(currentStaticPokemon);
+    }
+
     @Override
     public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
                                    boolean usePowerLevels, boolean noLegendaries, int levelModifier,
