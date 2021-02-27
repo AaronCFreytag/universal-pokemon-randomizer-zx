@@ -355,6 +355,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             String pstatsnarc = romEntry.getString("PokemonStats");
             pokeNarc = this.readNARC(pstatsnarc);
             String[] pokeNames = readPokemonNames();
+            String[] pokeCategories = readPokemonCategories();
             int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
             pokes = new Pokemon[Gen4Constants.pokemonCount + formeCount + 1];
             for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
@@ -363,6 +364,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 loadBasicPokeStats(pokes[i], pokeNarc.files.get(i));
                 // Name?
                 pokes[i].name = pokeNames[i];
+                pokes[i].category = pokeCategories[i];
             }
 
             int i = Gen4Constants.pokemonCount + 1;
@@ -374,6 +376,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 pokes[i].number = i;
                 loadBasicPokeStats(pokes[i], pokeNarc.files.get(k));
                 pokes[i].name = pokeNames[Gen4Constants.formeMappings.get(k).baseForme];
+                pokes[i].category = pokeCategories[Gen4Constants.formeMappings.get(k).baseForme];
                 pokes[i].baseForme = pokes[Gen4Constants.formeMappings.get(k).baseForme];
                 pokes[i].formeNumber = Gen4Constants.formeMappings.get(k).formeNumber;
                 pokes[i].formeSuffix = Gen4Constants.formeSuffixes.get(k);
@@ -439,6 +442,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return pokeNames;
     }
 
+    private String[] readPokemonCategories() {
+        String[] pokeCategories = new String[Gen4Constants.pokemonCount + 1];
+        List<String> categoryList = getStrings(romEntry.getInt("PokemonCategoriesTextOffset"));
+        for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
+            pokeCategories[i] = categoryList.get(i);
+        }
+        return pokeCategories;
+    }
+
     @Override
     protected void savingROM() {
         savePokemonStats();
@@ -494,6 +506,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     private void savePokemonStats() {
         // Update the "a/an X" list too, if it exists
         List<String> namesList = getStrings(romEntry.getInt("PokemonNamesTextOffset"));
+        List<String> categoryList = getStrings(romEntry.getInt("PokemonCategoriesTextOffset"));
         int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
         if (romEntry.getString("HasExtraPokemonNames").equalsIgnoreCase("Yes")) {
             List<String> namesList2 = getStrings(romEntry.getInt("PokemonNamesTextOffset") + 1);
@@ -506,6 +519,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 String oldName = namesList.get(i);
                 namesList.set(i, pokes[i].name);
                 namesList2.set(i, namesList2.get(i).replace(oldName, pokes[i].name));
+                categoryList.set(i, pokes[i].category);
             }
             setStrings(romEntry.getInt("PokemonNamesTextOffset") + 1, namesList2, false);
         } else {
@@ -516,9 +530,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
                 saveBasicPokeStats(pokes[i], pokeNarc.files.get(i));
                 namesList.set(i, pokes[i].name);
+                categoryList.set(i, pokes[i].category);
             }
         }
         setStrings(romEntry.getInt("PokemonNamesTextOffset"), namesList, false);
+        setStrings(romEntry.getInt("PokemonCategoriesTextOffset"), categoryList, false);
 
         try {
             String pstatsnarc = romEntry.getString("PokemonStats");
