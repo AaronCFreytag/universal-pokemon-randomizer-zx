@@ -1260,11 +1260,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 for (Encounter enc : area.encounters) {
                     enc.pokemon = enc.pokemon.getValidPreevoAtLevel(enc.level);
+                    setFormeForEncounter(enc, enc.pokemon);
                 }
             } else {
                 // Just do things in one loop with area encounters disabled
                 for (Encounter enc : area.encounters) {
                     enc.pokemon = enc.pokemon.getValidPreevoAtLevel(enc.level);
+                    setFormeForEncounter(enc, enc.pokemon);
                 }
             }
         }
@@ -1275,6 +1277,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<StaticEncounter> currentStaticPokemon = this.getStaticPokemon();
         for (StaticEncounter enc : currentStaticPokemon) {
             enc.pkmn = enc.pkmn.getValidPreevoAtLevel(enc.level);
+            setFormeForStaticEncounter(enc, enc.pkmn);
         }
         this.setStaticPokemon(currentStaticPokemon);
     }
