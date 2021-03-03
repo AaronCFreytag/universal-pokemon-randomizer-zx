@@ -444,9 +444,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 if (pk.number == 290) {
                     Pokemon shedinja = pokes[292];
                     Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
-                    evol.forme = -1;
-                    evol.level = 20;
                     pk.evolutionsFrom.add(evol);
+                    shedinja.evolutionsTo.add(evol);
                 }
 
                 // Split evos shouldn't carry stats unless the evo is Nincada's
@@ -758,6 +757,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         // Now that we've handled the hardcoded Shedinja evolution, delete it so that
         // we do *not* handle it in WriteEvolutions
         nincada.evolutionsFrom.remove(1);
+        extraEvolution.evolutionsTo.remove(0);
         writeFile(romEntry.getString("Evolution"), evolutionCRO);
     }
 
@@ -1071,7 +1071,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
             EncounterSet roughTerrainEncounters = readEncounter(encounterData, 192, 12);
             if (roughTerrainEncounters.encounters.size() > 0) {
-                roughTerrainEncounters.displayName = mapName + " Rough Terrain";
+                roughTerrainEncounters.displayName = mapName + " Rough Terrain/Tall Grass";
                 encounters.add(roughTerrainEncounters);
             }
 
@@ -1409,6 +1409,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         // Save
         writeFile(romEntry.getString("Field"), fieldCRO);
+
+        this.updatePokedexAreaDataXY(encounterGarc, fieldCRO);
     }
 
     private void setEncountersORAS(List<EncounterSet> encountersList) throws IOException {
@@ -1491,12 +1493,150 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         // Save
         writeGARC(encountersFile, encounterGarc);
+
+        this.updatePokedexAreaDataORAS(encounterGarc);
+    }
+
+    private void updatePokedexAreaDataXY(GARCArchive encounterGarc, byte[] fieldCRO) throws IOException {
+        byte[] pokedexAreaData = new byte[(Gen6Constants.pokemonCount + 1) * Gen6Constants.perPokemonAreaDataLengthXY];
+        for (int i = 0; i < pokedexAreaData.length; i += Gen6Constants.perPokemonAreaDataLengthXY) {
+            // This byte is 0x10 for *every* Pokemon. Why? No clue, but let's copy it.
+            pokedexAreaData[i + 133] = 0x10;
+        }
+        int currentMapNum = 0;
+
+        // Read all the "normal" encounters in the encounters GARC.
+        for (int i = 0; i < encounterGarc.files.size() - 1; i++) {
+            byte[] b = encounterGarc.files.get(i).get(0);
+            int offset = FileFunctions.readFullIntLittleEndian(b, 0x10) + 0x10;
+            int length = b.length - offset;
+            if (length < 0x178) { // No encounters in this map
+                continue;
+            }
+            int areaIndex = Gen6Constants.xyMapNumToPokedexIndex[currentMapNum];
+            byte[] encounterData = new byte[0x178];
+            System.arraycopy(b, offset, encounterData, 0, 0x178);
+
+            EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
+            updatePokedexAreaDataFromEncounterSet(grassEncounters, pokedexAreaData, areaIndex, 0x1);
+            EncounterSet yellowFlowerEncounters = readEncounter(encounterData, 48, 12);
+            updatePokedexAreaDataFromEncounterSet(yellowFlowerEncounters, pokedexAreaData, areaIndex, 0x2);
+            EncounterSet purpleFlowerEncounters = readEncounter(encounterData, 96, 12);
+            updatePokedexAreaDataFromEncounterSet(purpleFlowerEncounters, pokedexAreaData, areaIndex, 0x4);
+            EncounterSet redFlowerEncounters = readEncounter(encounterData, 144, 12);
+            updatePokedexAreaDataFromEncounterSet(redFlowerEncounters, pokedexAreaData, areaIndex, 0x8);
+            EncounterSet roughTerrainEncounters = readEncounter(encounterData, 192, 12);
+            updatePokedexAreaDataFromEncounterSet(roughTerrainEncounters, pokedexAreaData, areaIndex, 0x10);
+            EncounterSet surfEncounters = readEncounter(encounterData, 240, 5);
+            updatePokedexAreaDataFromEncounterSet(surfEncounters, pokedexAreaData, areaIndex, 0x20);
+            EncounterSet rockSmashEncounters = readEncounter(encounterData, 260, 5);
+            updatePokedexAreaDataFromEncounterSet(rockSmashEncounters, pokedexAreaData, areaIndex, 0x40);
+            EncounterSet oldRodEncounters = readEncounter(encounterData, 280, 3);
+            updatePokedexAreaDataFromEncounterSet(oldRodEncounters, pokedexAreaData, areaIndex, 0x80);
+            EncounterSet goodRodEncounters = readEncounter(encounterData, 292, 3);
+            updatePokedexAreaDataFromEncounterSet(goodRodEncounters, pokedexAreaData, areaIndex, 0x100);
+            EncounterSet superRodEncounters = readEncounter(encounterData, 304, 3);
+            updatePokedexAreaDataFromEncounterSet(superRodEncounters, pokedexAreaData, areaIndex, 0x200);
+            EncounterSet hordeCommonEncounters = readEncounter(encounterData, 316, 5);
+            updatePokedexAreaDataFromEncounterSet(hordeCommonEncounters, pokedexAreaData, areaIndex, 0x400);
+            EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 336, 5);
+            updatePokedexAreaDataFromEncounterSet(hordeUncommonEncounters, pokedexAreaData, areaIndex, 0x400);
+            EncounterSet hordeRareEncounters = readEncounter(encounterData, 356, 5);
+            updatePokedexAreaDataFromEncounterSet(hordeRareEncounters, pokedexAreaData, areaIndex, 0x400);
+            currentMapNum++;
+        }
+
+        // Now read all the stuff that's hardcoded in the Field CRO
+        for (int i = 0; i < Gen6Constants.fallingEncounterCount; i++) {
+            int areaIndex = Gen6Constants.xyMapNumToPokedexIndex[currentMapNum];
+            int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fieldEncounterSize;
+            EncounterSet fallingEncounter = readFieldEncounter(fieldCRO, offset);
+            updatePokedexAreaDataFromEncounterSet(fallingEncounter, pokedexAreaData, areaIndex, 0x800);
+            currentMapNum++;
+        }
+        for (int i = 0; i < Gen6Constants.rustlingBushEncounterCount; i++) {
+            int areaIndex = Gen6Constants.xyMapNumToPokedexIndex[currentMapNum];
+            int offset = Gen6Constants.rustlingBushEncounterOffset + i * Gen6Constants.fieldEncounterSize;
+            EncounterSet rustlingBushEncounter = readFieldEncounter(fieldCRO, offset);
+            updatePokedexAreaDataFromEncounterSet(rustlingBushEncounter, pokedexAreaData, areaIndex, 0x800);
+            currentMapNum++;
+        }
+
+        // Write out the newly-created area data to the GARC
+        GARCArchive pokedexAreaGarc = readGARC(romEntry.getString("PokedexAreaData"), true);
+        pokedexAreaGarc.setFile(0, pokedexAreaData);
+        writeGARC(romEntry.getString("PokedexAreaData"), pokedexAreaGarc);
+    }
+
+    private void updatePokedexAreaDataORAS(GARCArchive encounterGarc) throws IOException {
+        byte[] pokedexAreaData = new byte[(Gen6Constants.pokemonCount + 1) * Gen6Constants.perPokemonAreaDataLengthORAS];
+        int currentMapNum = 0;
+        for (int i = 0; i < encounterGarc.files.size() - 2; i++) {
+            byte[] b = encounterGarc.files.get(i).get(0);
+            int offset = FileFunctions.readFullIntLittleEndian(b, 0x10) + 0xE;
+            int offset2 = FileFunctions.readFullIntLittleEndian(b, 0x14);
+            int length = offset2 - offset;
+            if (length < 0xF6) { // No encounters in this map
+                continue;
+            }
+            int areaIndex = Gen6Constants.orasMapNumToPokedexIndex[currentMapNum];
+            if (areaIndex == -1) { // Current encounters are not taken into account for the Pokedex
+                currentMapNum++;
+                continue;
+            }
+            byte[] encounterData = new byte[0xF6];
+            System.arraycopy(b, offset, encounterData, 0, 0xF6);
+
+            EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
+            updatePokedexAreaDataFromEncounterSet(grassEncounters, pokedexAreaData, areaIndex, 0x1);
+            EncounterSet longGrassEncounters = readEncounter(encounterData, 48, 12);
+            updatePokedexAreaDataFromEncounterSet(longGrassEncounters, pokedexAreaData, areaIndex, 0x2);
+            int foreignEncounterType = grassEncounters.encounters.size() > 0 ? 0x04 : 0x08;
+            EncounterSet dexNavForeignEncounters = readEncounter(encounterData, 96, 3);
+            updatePokedexAreaDataFromEncounterSet(dexNavForeignEncounters, pokedexAreaData, areaIndex, foreignEncounterType);
+            EncounterSet surfEncounters = readEncounter(encounterData, 108, 5);
+            updatePokedexAreaDataFromEncounterSet(surfEncounters, pokedexAreaData, areaIndex, 0x10);
+            EncounterSet rockSmashEncounters = readEncounter(encounterData, 128, 5);
+            updatePokedexAreaDataFromEncounterSet(rockSmashEncounters, pokedexAreaData, areaIndex, 0x20);
+            EncounterSet oldRodEncounters = readEncounter(encounterData, 148, 3);
+            updatePokedexAreaDataFromEncounterSet(oldRodEncounters, pokedexAreaData, areaIndex, 0x40);
+            EncounterSet goodRodEncounters = readEncounter(encounterData, 160, 3);
+            updatePokedexAreaDataFromEncounterSet(goodRodEncounters, pokedexAreaData, areaIndex, 0x80);
+            EncounterSet superRodEncounters = readEncounter(encounterData, 172, 3);
+            updatePokedexAreaDataFromEncounterSet(superRodEncounters, pokedexAreaData, areaIndex, 0x100);
+            EncounterSet hordeCommonEncounters = readEncounter(encounterData, 184, 5);
+            updatePokedexAreaDataFromEncounterSet(hordeCommonEncounters, pokedexAreaData, areaIndex, 0x200);
+            EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 204, 5);
+            updatePokedexAreaDataFromEncounterSet(hordeUncommonEncounters, pokedexAreaData, areaIndex, 0x200);
+            EncounterSet hordeRareEncounters = readEncounter(encounterData, 224, 5);
+            updatePokedexAreaDataFromEncounterSet(hordeRareEncounters, pokedexAreaData, areaIndex, 0x200);
+            currentMapNum++;
+        }
+
+        GARCArchive pokedexAreaGarc = readGARC(romEntry.getString("PokedexAreaData"), true);
+        pokedexAreaGarc.setFile(0, pokedexAreaData);
+        writeGARC(romEntry.getString("PokedexAreaData"), pokedexAreaGarc);
+    }
+
+    private void updatePokedexAreaDataFromEncounterSet(EncounterSet es, byte[] pokedexAreaData, int areaIndex, int encounterType) {
+        for (Encounter enc : es.encounters) {
+            Pokemon pkmn = enc.pokemon;
+            while (pkmn.baseForme != null) { // Failsafe if we need to write encounters without modifying species
+                pkmn = pkmn.baseForme;
+            }
+            int perPokemonAreaDataLength = romEntry.romType == Gen6Constants.Type_XY ?
+                    Gen6Constants.perPokemonAreaDataLengthXY : Gen6Constants.perPokemonAreaDataLengthORAS;
+            int offset = pkmn.number * perPokemonAreaDataLength + areaIndex * 4;
+            int value = FileFunctions.readFullIntLittleEndian(pokedexAreaData, offset);
+            value |= encounterType;
+            FileFunctions.writeFullIntLittleEndian(pokedexAreaData, offset, value);
+        }
     }
 
     private void writeEncounter(byte[] data, int offset, List<Encounter> encounters) {
         for (int i = 0; i < encounters.size(); i++) {
             Encounter encounter = encounters.get(i);
-            if (encounter.pokemon.formeNumber > 0) { // Failsafe if we need to write encounters without modifying species
+            while (encounter.pokemon.baseForme != null) { // Failsafe if we need to write encounters without modifying species
                 encounter.pokemon = encounter.pokemon.baseForme;
             }
             int speciesAndFormeData = (encounter.formeNumber << 11) + encounter.pokemon.number;
@@ -1509,7 +1649,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private void writeFieldEncounter(byte[] data, int offset, List<Encounter> encounters) {
         for (int i = 0; i < encounters.size(); i++) {
             Encounter encounter = encounters.get(i);
-            if (encounter.pokemon.formeNumber > 0) { // Failsafe if we need to write encounters without modifying species
+            while (encounter.pokemon.baseForme != null) { // Failsafe if we need to write encounters without modifying species
                 encounter.pokemon = encounter.pokemon.baseForme;
             }
             writeWord(data, offset + 4 + i * 8, encounter.pokemon.number);
@@ -2392,6 +2532,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<Integer> getMainGameLegendaries() {
+        return Arrays.stream(romEntry.arrayEntries.get("MainGameLegendaries")).boxed().collect(Collectors.toList());
+    }
+
+    @Override
     public List<TotemPokemon> getTotemPokemon() {
         return new ArrayList<>();
     }
@@ -2542,18 +2687,24 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         }
                     } else if (evo.type == EvolutionType.LEVEL_ITEM_DAY) {
                         int item = evo.extraInfo;
-                        // Add an extra evo for Level w/ Item During Night
-                        logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
-                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
-                                EvolutionType.LEVEL_ITEM_NIGHT, item);
-                        extraEvolutions.add(extraEntry);
+                        // Make sure we don't already have an evo for the same item at night (e.g., when using Change Impossible Evos)
+                        if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_NIGHT && e.extraInfo == item)) {
+                            // Add an extra evo for Level w/ Item During Night
+                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.LEVEL_ITEM_NIGHT, item);
+                            extraEvolutions.add(extraEntry);
+                        }
                     } else if (evo.type == EvolutionType.LEVEL_ITEM_NIGHT) {
                         int item = evo.extraInfo;
-                        // Add an extra evo for Level w/ Item During Day
-                        logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
-                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
-                                EvolutionType.LEVEL_ITEM_DAY, item);
-                        extraEvolutions.add(extraEntry);
+                        // Make sure we don't already have an evo for the same item at day (e.g., when using Change Impossible Evos)
+                        if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_DAY && e.extraInfo == item)) {
+                            // Add an extra evo for Level w/ Item During Day
+                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                    EvolutionType.LEVEL_ITEM_DAY, item);
+                            extraEvolutions.add(extraEntry);
+                        }
                     } else if (evo.type == EvolutionType.LEVEL_DAY || evo.type == EvolutionType.LEVEL_NIGHT) {
                         logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), evo.extraInfo);
                         evo.type = EvolutionType.LEVEL;

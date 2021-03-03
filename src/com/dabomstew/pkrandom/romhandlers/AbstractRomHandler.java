@@ -3336,7 +3336,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers,
+    public void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMainGameLegendaries,
                                        boolean limit600, boolean allowAltFormes, boolean swapMegaEvos,
                                        boolean abilitiesAreRandomized, int levelModifier) {
         // Load
@@ -3447,6 +3447,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             .collect(Collectors.toList());
             List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
+            List<Integer> mainGameLegendaries = getMainGameLegendaries();
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
                 Pokemon newPK;
@@ -3467,52 +3468,45 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
                 } else {
-                    if ((oldPK.number == 638 || oldPK.number == 639 || oldPK.number == 640) && limitMusketeers) {
-                        newPK = pickStaticPowerLvlReplacement(
-                                pokemonLeft,
-                                oldPK,
-                                true,
-                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
-                                true);
-                    } else {
-                        if (reallySwapMegaEvos && old.canMegaEvolve()) {
-                            List<Pokemon> megaEvoPokemonLeft =
+                    boolean limitBST = oldPK.baseForme == null ?
+                            limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.number) :
+                            limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.baseForme.number);
+                    if (reallySwapMegaEvos && old.canMegaEvolve()) {
+                        List<Pokemon> megaEvoPokemonLeft =
+                                megaEvolutionsList
+                                        .stream()
+                                        .filter(mega -> mega.method == 1)
+                                        .map(mega -> mega.from)
+                                        .distinct()
+                                        .filter(pokemonLeft::contains)
+                                        .collect(Collectors.toList());
+                        if (megaEvoPokemonLeft.isEmpty()) {
+                            megaEvoPokemonLeft =
                                     megaEvolutionsList
                                             .stream()
                                             .filter(mega -> mega.method == 1)
                                             .map(mega -> mega.from)
                                             .distinct()
-                                            .filter(pokemonLeft::contains)
+                                            .filter(mainPokemonList::contains)
                                             .collect(Collectors.toList());
-                            if (megaEvoPokemonLeft.isEmpty()) {
-                                megaEvoPokemonLeft =
-                                        megaEvolutionsList
-                                                .stream()
-                                                .filter(mega -> mega.method == 1)
-                                                .map(mega -> mega.from)
-                                                .distinct()
-                                                .filter(mainPokemonList::contains)
-                                                .collect(Collectors.toList());
-                            }
-                            boolean limitBST = generationOfPokemon() == 6 && (oldPK.number == 380 || oldPK.number == 381);
-                            newPK = pickStaticPowerLvlReplacement(
-                                    megaEvoPokemonLeft,
-                                    oldPK,
-                                    true,
-                                    replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
-                                    limitBST);
-                            newStatic.heldItem = newPK
-                                    .megaEvolutionsFrom
-                                    .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
-                                    .argument;
-                        } else {
-                            newPK = pickStaticPowerLvlReplacement(
-                                    pokemonLeft,
-                                    oldPK,
-                                    true,
-                                    replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
-                                    false);
                         }
+                        newPK = pickStaticPowerLvlReplacement(
+                                megaEvoPokemonLeft,
+                                oldPK,
+                                true,
+                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                                limitBST);
+                        newStatic.heldItem = newPK
+                                .megaEvolutionsFrom
+                                .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
+                                .argument;
+                    } else {
+                        newPK = pickStaticPowerLvlReplacement(
+                                pokemonLeft,
+                                oldPK,
+                                true,
+                                replacements.stream().map(enc -> enc.pkmn).collect(Collectors.toList()),
+                                limitBST);
                     }
                     pokemonLeft.remove(newPK);
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
@@ -3765,7 +3759,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
             (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
                     evFrom, evTo, compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType
-            ), true);
+            ), false);
         }
         else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
@@ -3888,7 +3882,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 1; i < toCompat.length; i++) {
                 toCompat[i] |= fromCompat[i];
             }
-        }), true);
+        }), false);
         this.setTMHMCompatibility(compat);
     }
 
@@ -3903,6 +3897,24 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Set the new compatibility
+        this.setTMHMCompatibility(compat);
+    }
+
+    @Override
+    public void copyTMCompatibilityToCosmeticFormes() {
+        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+            Pokemon pkmn = compatEntry.getKey();
+            boolean[] flags = compatEntry.getValue();
+            if (pkmn.actuallyCosmetic) {
+                boolean[] baseFlags = compat.get(pkmn.baseForme);
+                for (int i = 1; i < flags.length; i++) {
+                    flags[i] = baseFlags[i];
+                }
+            }
+        }
+
         this.setTMHMCompatibility(compat);
     }
 
@@ -4004,7 +4016,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pk, compat.get(pk), mts, priorityTutors, preferSameType),
                     (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
                             evFrom, evTo, compat.get(evFrom), compat.get(evTo), mts, preferSameType
-                    ), true);
+                    ), false);
         }
         else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
@@ -4068,7 +4080,25 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (int i = 1; i < toCompat.length; i++) {
                 toCompat[i] |= fromCompat[i];
             }
-        }), true);
+        }), false);
+        this.setMoveTutorCompatibility(compat);
+    }
+
+    @Override
+    public void copyMoveTutorCompatibilityToCosmeticFormes() {
+        Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
+
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+            Pokemon pkmn = compatEntry.getKey();
+            boolean[] flags = compatEntry.getValue();
+            if (pkmn.actuallyCosmetic) {
+                boolean[] baseFlags = compat.get(pkmn.baseForme);
+                for (int i = 1; i < flags.length; i++) {
+                    flags[i] = baseFlags[i];
+                }
+            }
+        }
+
         this.setMoveTutorCompatibility(compat);
     }
 
@@ -5178,11 +5208,11 @@ public abstract class AbstractRomHandler implements RomHandler {
      *            Method to run on all base or no-copy Pokemon
      * @param epAction
      *            Method to run on all evolved Pokemon with a linear chain of
-     * @param ignoreNoCopyFlag
-     *            If true, treat no-copy pokemon like other evolutions
+     * @param dontCopySplitEvos
+     *            If true, treat split evolutions the same way as base Pokemon
      */
     private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction,
-                                        boolean ignoreNoCopyFlag) {
+                                        boolean dontCopySplitEvos) {
         List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
             if (pk != null) {
@@ -5191,8 +5221,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Get evolution data.
-        Set<Pokemon> dontCopyPokes = RomFunctions.getBasicPokemon(this, !ignoreNoCopyFlag);
-        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this);
+        Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(this, dontCopySplitEvos);
+        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this, !dontCopySplitEvos);
 
         for (Pokemon pk : dontCopyPokes) {
             bpAction.applyTo(pk);
@@ -5229,7 +5259,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
-        copyUpEvolutionsHelper(bpAction, epAction, false);
+        copyUpEvolutionsHelper(bpAction, epAction, true);
     }
 
     private boolean checkForUnusedMove(List<Move> potentialList, Set<Integer> alreadyUsed) {

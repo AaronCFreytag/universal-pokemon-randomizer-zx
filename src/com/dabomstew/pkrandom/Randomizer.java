@@ -560,6 +560,12 @@ public class Randomizer {
             romHandler.fullHMCompatibility();
         }
 
+        // Copy TM/HM compatibility to cosmetic formes if it was changed at all
+        if (settings.getTmsHmsCompatibilityMod() != Settings.TMsHMsCompatibilityMod.UNCHANGED
+                || settings.isTmLevelUpMoveSanity()) {
+            romHandler.copyTMCompatibilityToCosmeticFormes();
+        }
+
         maybeLogTMHMCompatibility(log, romHandler);
 
         // Move Tutors (new 1.0.3)
@@ -605,6 +611,13 @@ public class Randomizer {
                 if (settings.isTutorFollowEvolutions()) {
                     romHandler.ensureMoveTutorEvolutionSanity();
                 }
+
+            }
+
+            // Copy move tutor compatibility to cosmetic formes if it was changed at all
+            if (settings.getMoveTutorsCompatibilityMod() != Settings.MoveTutorsCompatibilityMod.UNCHANGED
+                    || settings.isTutorLevelUpMoveSanity()) {
+                romHandler.copyMoveTutorCompatibilityToCosmeticFormes();
             }
 
             maybeLogTutorCompatibility(log, romHandler);
@@ -1025,17 +1038,17 @@ public class Randomizer {
         if (romHandler.canChangeStaticPokemon()) {
             List<StaticEncounter> oldStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) { // Legendary for L
-                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMusketeers(),
+                romHandler.randomizeStaticPokemon(true, false,settings.isLimitMainGameLegendaries(),
                         settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
                         settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
                         settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
-                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMusketeers(),
+                romHandler.randomizeStaticPokemon(false, false,settings.isLimitMainGameLegendaries(),
                         settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
                         settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
                         settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);
             } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.SIMILAR_STRENGTH) {
-                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMusketeers(),
+                romHandler.randomizeStaticPokemon(false, true,settings.isLimitMainGameLegendaries(),
                         settings.isLimit600(), settings.isAllowStaticAltFormes(), settings.isSwapStaticMegaEvos(),
                         settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE,
                         settings.isStaticLevelModified() ? settings.getStaticLevelModifier() : 0);

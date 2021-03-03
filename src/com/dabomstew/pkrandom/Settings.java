@@ -110,7 +110,7 @@ public class Settings {
     // offset from the dropdown index from RandomizerGUI by 1
     private int[] customStarters = new int[3];
     private boolean randomizeStartersHeldItems;
-    private boolean limitMusketeers;
+    private boolean limitMainGameLegendaries;
     private boolean limit600;
     private boolean banBadRandomStarterHeldItems;
 
@@ -424,7 +424,7 @@ public class Settings {
                 staticPokemonMod == StaticPokemonMod.RANDOM_MATCHING,
                 staticPokemonMod == StaticPokemonMod.COMPLETELY_RANDOM,
                 staticPokemonMod == StaticPokemonMod.SIMILAR_STRENGTH,
-                limitMusketeers, limit600, allowStaticAltFormes, swapStaticMegaEvos));
+                limitMainGameLegendaries, limit600, allowStaticAltFormes, swapStaticMegaEvos));
 
         // 18 tm randomization
         // new stuff 162
@@ -436,7 +436,7 @@ public class Settings {
 
         // 19 tms part 2
         // new in 170
-        out.write(makeByteSelected(fullHMCompat));
+        out.write(makeByteSelected(fullHMCompat, tmsFollowEvolutions, tutorFollowEvolutions));
 
         // 20 tms good damaging
         out.write((tmsForceGoodDamaging ? 0x80 : 0) | tmsGoodDamagingPercent);
@@ -555,9 +555,8 @@ public class Settings {
         out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
 
         // 48 more extra stuff
-        out.write(makeByteSelected(tmsFollowEvolutions, tutorFollowEvolutions, retainNumberOfAbilities,
-                trainersNoDuplicatePokemon, trainerBossBoost, randomizeMovesLearnedWithSwap, devolveIllegalWildPokemon,
-                devolveIllegalStaticPokemon));
+        out.write(makeByteSelected(retainNumberOfAbilities, trainersNoDuplicatePokemon, trainerBossBoost,
+                randomizeMovesLearnedWithSwap, devolveIllegalWildPokemon, devolveIllegalStaticPokemon));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -688,7 +687,7 @@ public class Settings {
                 3  // SIMILAR_STRENGTH 
         ));
         
-        settings.setLimitMusketeers(restoreState(data[17], 4));
+        settings.setLimitMainGameLegendaries(restoreState(data[17], 4));
         settings.setLimit600(restoreState(data[17], 5));
         settings.setAllowStaticAltFormes(restoreState(data[17], 6));
         settings.setSwapStaticMegaEvos(restoreState(data[17], 7));
@@ -703,7 +702,10 @@ public class Settings {
         )); 
         settings.setTmLevelUpMoveSanity(restoreState(data[18], 5));
         settings.setKeepFieldMoveTMs(restoreState(data[18], 6));
+
         settings.setFullHMCompat(restoreState(data[19], 0));
+        settings.setTmsFollowEvolutions(restoreState(data[19], 1));
+        settings.setTutorFollowEvolutions(restoreState(data[19], 2));
 
         settings.setTmsForceGoodDamaging(restoreState(data[20], 7));
         settings.setTmsGoodDamagingPercent(data[20] & 0x7F);
@@ -829,14 +831,12 @@ public class Settings {
         settings.setStaticLevelModified(restoreState(data[47],7));
         settings.setStaticLevelModifier((data[47] & 0x7F) - 50);
 
-        settings.setTmsFollowEvolutions(restoreState(data[48], 0));
-        settings.setTutorFollowEvolutions(restoreState(data[48], 1));   
-        settings.setRetainNumberOfAbilities(restoreState(data[48], 2));
-        settings.setTrainersNoDuplicatePokemon(restoreState(data[48], 3));
-        settings.setTrainerBossBoost(restoreState(data[48], 4));
-        settings.setRandomizeMovesLearnedWithSwap(restoreState(data[48], 5));
-        settings.setDevolveIllegalWildPokemon(restoreState(data[48], 6));
-        settings.setDevolveIllegalStaticPokemon(restoreState(data[48], 7));
+        settings.setRetainNumberOfAbilities(restoreState(data[48], 0));
+        settings.setTrainersNoDuplicatePokemon(restoreState(data[48], 1));
+        settings.setTrainerBossBoost(restoreState(data[48], 2));
+        settings.setRandomizeMovesLearnedWithSwap(restoreState(data[48], 3));
+        settings.setDevolveIllegalWildPokemon(restoreState(data[48], 4));
+        settings.setDevolveIllegalStaticPokemon(restoreState(data[48], 5));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1795,12 +1795,12 @@ public class Settings {
         this.staticPokemonMod = staticPokemonMod;
     }
 
-    public boolean isLimitMusketeers() {
-        return limitMusketeers;
+    public boolean isLimitMainGameLegendaries() {
+        return limitMainGameLegendaries;
     }
 
-    public void setLimitMusketeers(boolean limitMusketeers) {
-        this.limitMusketeers = limitMusketeers;
+    public void setLimitMainGameLegendaries(boolean limitMainGameLegendaries) {
+        this.limitMainGameLegendaries = limitMainGameLegendaries;
     }
 
     public boolean isLimit600() {

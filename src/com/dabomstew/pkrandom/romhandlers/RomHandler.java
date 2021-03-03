@@ -281,7 +281,7 @@ public interface RomHandler {
 
     boolean setStaticPokemon(List<StaticEncounter> staticPokemon);
 
-    void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMusketeers,
+    void randomizeStaticPokemon(boolean swapLegendaries, boolean similarStrength, boolean limitMainGameLegendaries,
                                 boolean limit600, boolean allowAltFormes, boolean swapMegaEvos1,
                                 boolean abilitiesAreRandomized, int levelModifier);
 
@@ -296,6 +296,8 @@ public interface RomHandler {
     void onlyChangeStaticLevels(int levelModifier);
 
     void devolveInvalidStaticPokemon();
+    
+    List<Integer> getMainGameLegendaries();
 
     // Randomizer: Totem Pokemon
 
@@ -351,6 +353,8 @@ public interface RomHandler {
 
     // Randomizer: move tutors
 
+    void copyTMCompatibilityToCosmeticFormes();
+
     boolean hasMoveTutors();
 
     List<Integer> getMoveTutorMoves();
@@ -374,6 +378,8 @@ public interface RomHandler {
     void ensureMoveTutorEvolutionSanity();
 
     // Randomizer: trainer names
+
+    void copyMoveTutorCompatibilityToCosmeticFormes();
 
     boolean canChangeTrainerText();
 
