@@ -5,7 +5,6 @@ This is a fork of Pokemon Randomizer ZX which has some additional changes design
 Notable differences:
 - Pokemon statline swapping, with associated pokemon evolution method swapping
 - "Augmented" type randomization, which will infrequently add a secondary type to a monotype evolution line
-- TM/Tutor compatibility evolution following
 - Tweaked same-type move learning probability to be more biased towards a pokemon's type(s) and normal type moves
 - (Currently extremely limited) Pokemon Showdown mod file export
 
