@@ -1,8 +1,8 @@
 Universal Pokemon Randomizer ZX Advent
 
-This is a fork of Pokemon Randomizer ZX which has some additional changes designed for a bit less of a crazy random experience while still retaining randomization elements. These changes also include various QOL settings and new features.
+This is a fork of Pokemon Randomizer ZX with some extra features that might be useful or interesting. There are also a couple of tweaks to existing things in the randomizer like adjusted move learning probabilities and ordering.
 
-Notable differences:
+Notable differences and additions:
 - Pokemon statline swapping, with associated pokemon evolution method swapping
 - "Augmented" type randomization, which will infrequently add a secondary type to a monotype evolution line
 - Tweaked same-type move learning probability to be more biased towards a pokemon's type(s) and normal type moves
