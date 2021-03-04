@@ -5780,7 +5780,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             int maxTarget = currentBST + currentBST / 10;
             if (boostBst) {
                 minTarget *= 1.1;
-                maxTarget *= 1.1;
+                maxTarget *= 1.2;
             }
             List<Pokemon> canPick = new ArrayList<>();
             int expandRounds = 0;
