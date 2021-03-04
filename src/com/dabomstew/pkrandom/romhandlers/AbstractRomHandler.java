@@ -320,17 +320,25 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public Map<Pokemon, Pokemon> swapPokemonStats(boolean evolutionSanity, boolean megaEvolutionSanity) {
+        checkPokemonRestrictions();
         Map<Pokemon, Pokemon> swaps = new TreeMap<Pokemon, Pokemon>();
+        List<Pokemon> allPokes = this.getPokemonInclFormes();
         // If evolution sanity is enabled, determine evolution groups and swap those
         if (evolutionSanity) {
-            List<Pokemon> allPokes = this.getPokemonInclFormes();
-            Map<Integer, List<Pokemon>> finalEvosByCount = new TreeMap<Integer, List<Pokemon>>();
-            Map<Integer, List<Pokemon>> legendaryFinalEvosByCount = new TreeMap<Integer, List<Pokemon>>();
+            // Byte 0: Legendary
+            // Byte 1: Mega Evolvable
+            List<Map<Integer, List<Pokemon>>> finalEvosByCount = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                finalEvosByCount.add(new TreeMap<>());
+            }
             Map<Pokemon, List<Pokemon>> uniqueStatFormeCache = new TreeMap<Pokemon, List<Pokemon>>();
             Map<Pokemon, Pokemon> statCopies = new TreeMap<Pokemon, Pokemon>();
             for (Pokemon pkmn : allPokes) {
                 // If fully evolved pokemon, not a cosmetic form, and not shedinja
-                if (pkmn != null && pkmn.evolutionsFrom.size() == 0 && pkmn.number != 292 && !pkmn.actuallyCosmetic) {
+                // If mega sanity, skip pokemon that CAN mega evolve; If not mega sanity, skip mega evolutions and deal
+                // with them later.
+                if (pkmn != null && pkmn.evolutionsFrom.size() == 0 && pkmn.number != 292 && !pkmn.actuallyCosmetic
+                && (megaEvolutionSanity ? pkmn.megaEvolutionsFrom.size() == 0 : pkmn.megaEvolutionsTo.size() == 0)) {
                     // Skip pokemon which are formes with the same stats as their base form
                     // Or pokemon with formes that have the same stats as another forme
                     if (pkmn.formeNumber != 0 && pkmn.baseForme != null) {
@@ -360,16 +368,28 @@ public abstract class AbstractRomHandler implements RomHandler {
                     // Now figure out how many steps are in the evolution
                     int evoChainSize = 0;
                     Pokemon tmp = pkmn;
+                    while (tmp.megaEvolutionsTo.size() > 0 && tmp.megaEvolutionsTo.get(0).carryStats) {
+                        evoChainSize++;
+                        tmp = tmp.megaEvolutionsTo.get(0).from;
+                    }
                     while (tmp.evolutionsTo.size() > 0 && tmp.evolutionsTo.get(0).carryStats) {
                         evoChainSize++;
                         tmp = tmp.evolutionsTo.get(0).from;
                     }
 
-                    // Use the legendary pool if pokemon is a legendary or an ultra beast
-                    Map<Integer, List<Pokemon>> list = finalEvosByCount;
-                    if (pkmn.isLegendary()) {
-                        list = legendaryFinalEvosByCount;
+                    int loc = 0;
+
+                    // Use the legendary pool if pokemon is a legendary
+                    if (pkmn.isLegendary() || ultraBeastList.contains(pkmn)) {
+                        loc |= 1;
                     }
+
+                    // Use the mega evolution pool if pokemon is mega
+                    if (pkmn.megaEvolutionsTo.size() > 0) {
+                        loc |= 2;
+                    }
+
+                    Map<Integer, List<Pokemon>> list = finalEvosByCount.get(loc);
 
                     if (!list.containsKey((evoChainSize))) {
                         list.put(evoChainSize, new ArrayList<Pokemon>());
@@ -377,11 +397,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                     list.get(evoChainSize).add(pkmn);
                 }
             }
-            for (Map.Entry<Integer, List<Pokemon>> entry : finalEvosByCount.entrySet()) {
-                swaps.putAll(swapPokemonStatsInList(entry.getValue(), true));
-            }
-            for (Map.Entry<Integer, List<Pokemon>> entry : legendaryFinalEvosByCount.entrySet()) {
-                swaps.putAll(swapPokemonStatsInList(entry.getValue(), true));
+            for (Map<Integer, List<Pokemon>> finalEvoPool : finalEvosByCount) {
+                for (Map.Entry<Integer, List<Pokemon>> entry : finalEvoPool.entrySet()) {
+                    swaps.putAll(swapPokemonStatsInList(entry.getValue(), true));
+                }
             }
             for (Map.Entry<Pokemon, Pokemon> entry : statCopies.entrySet()) {
                 Pokemon pkmn = entry.getKey();
@@ -390,13 +409,33 @@ public abstract class AbstractRomHandler implements RomHandler {
                 swaps.put(pkmn, swaps.get(pkmnToStatCopy));
             }
         }
-
         // With evolution sanity disabled, just swap at complete random
         else {
-            swaps.putAll(swapPokemonStatsInList(this.getPokemonInclFormes(), true));
+            List<Pokemon> pokes = new ArrayList<>();
+            for (Pokemon pkmn : allPokes) {
+                if (pkmn != null) {
+                    pokes.add(pkmn);
+                }
+            }
+            swaps.putAll(swapPokemonStatsInList(pokes, false));
         }
 
-        List<Pokemon> allPokes = this.getPokemonInclFormes();
+        // With mega evolution sanity disabled, swap megas at the end
+        if (!megaEvolutionSanity) {
+            List<List<Pokemon>> megas = new ArrayList<>();
+            for (int i = 0; i < 2; i++) {
+                megas.add(new ArrayList<Pokemon>());
+            }
+            for (Pokemon pkmn : allPokes) {
+                if (pkmn != null && pkmn.megaEvolutionsTo.size() > 0) {
+                    megas.get(pkmn.isLegendary() ? 1 : 0).add(pkmn);
+                }
+            }
+            for (List<Pokemon> subMegaList : megas) {
+                swaps.putAll(swapPokemonStatsInList(subMegaList, false));
+            }
+        }
+
         for (Pokemon pk : allPokes) {
             if (pk != null && pk.actuallyCosmetic && swaps.containsKey(pk.baseForme)) {
                 pk.copyBaseFormeBaseStats(pk.baseForme);
@@ -459,8 +498,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // Make a note in the swaps map, for bookkeeping purposes
                 pokemonSwaps.put(pkmnToChange, pkmnToCopyStats);
 
-                // Continue down the pre-evos if necessary
-                if (alsoDoPreevos && pkmnToChange.evolutionsTo.size() > 0 && pkmnToCopyStats.evolutionsTo.size() > 0
+                // Continue down the mega pre-evos if necessary
+                if (alsoDoPreevos && pkmnToChange.megaEvolutionsTo.size() > 0 && pkmnToCopyStats.megaEvolutionsTo.size() > 0
+                        && pkmnToChange.megaEvolutionsTo.get(0).carryStats && pkmnToCopyStats.megaEvolutionsTo.get(0).carryStats) {
+                    pkmnToChange = pkmnToChange.megaEvolutionsTo.get(0).from;
+                    pkmnToCopyStats = pkmnToCopyStats.megaEvolutionsTo.get(0).from;
+                }
+                // Otherwise, continue down the pre-evos if necessary
+                else if (alsoDoPreevos && pkmnToChange.evolutionsTo.size() > 0 && pkmnToCopyStats.evolutionsTo.size() > 0
                         && pkmnToChange.evolutionsTo.get(0).carryStats && pkmnToCopyStats.evolutionsTo.get(0).carryStats) {
                     pkmnToChange = pkmnToChange.evolutionsTo.get(0).from;
                     pkmnToCopyStats = pkmnToCopyStats.evolutionsTo.get(0).from;
