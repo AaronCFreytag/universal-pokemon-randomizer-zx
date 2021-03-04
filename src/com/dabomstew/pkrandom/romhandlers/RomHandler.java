@@ -175,7 +175,7 @@ public interface RomHandler {
 
     void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
                             boolean banNegativeAbilities, boolean banBadAbilities, boolean megaEvolutionSanity,
-                            boolean weighDuplicatesTogether, boolean retainAbilityNumber);
+                            boolean weighDuplicatesTogether, boolean retainAbilityNumber, boolean boostTerribleAbilities);
 
     Map<Integer,List<Integer>> getAbilityVariations();
 

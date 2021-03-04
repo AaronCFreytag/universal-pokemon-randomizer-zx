@@ -177,12 +177,66 @@ public class Pokemon implements Comparable<Pokemon> {
         return hp + attack + defense + spatk + spdef + speed;
     }
 
+    public void boostStatsIfTerribleAbility() {
+        switch(ability1) {
+            case 129: {
+                // Defeatist; +30% attack, +30% sp. attack
+                attack = Math.min((int)(attack * 1.3), 255);
+                spatk = Math.min((int)(spatk * 1.3), 255);
+                break;
+            }
+            case 112: {
+                // Slow Start; +50% attack, +50% speed
+                attack = Math.min((int)(attack * 1.5), 255);
+                speed = Math.min((int)(speed * 1.5), 255);
+                break;
+            }
+            case 54: {
+                // Truant; +50% HP, +50% attack, +50% sp. attack
+                hp = Math.min((int)(hp * 1.5), 255);
+                attack = Math.min((int)(attack * 1.5), 255);
+                spatk = Math.min((int)(spatk * 1.5), 255);
+                break;
+            }
+        }
+    }
+
     public int bstForPowerLevels() {
         // Take into account Shedinja's purposefully nerfed HP
         if (number == 292) {
             return (attack + defense + spatk + spdef + speed) * 6 / 5;
         } else {
-            return hp + attack + defense + spatk + spdef + speed;
+            int tmpHP = hp;
+            int tmpAttack = attack;
+            int tmpDefense = defense;
+            int tmpSpAtk = spatk;
+            int tmpSpDef = spdef;
+            int tmpSpeed = speed;
+            // If the pokemon only has one ability and it's terrible, lower power level BST accordingly
+            if ((ability1 == ability2 || ability2 == 0) && (ability1 == ability3 || ability3 == 0)) {
+                switch(ability1) {
+                    case 129: {
+                        // Defeatist; +30% attack, +30% sp. attack
+                        tmpAttack = Math.max((int)(attack / 1.3), 1);
+                        tmpSpAtk = Math.max((int)(spatk / 1.3), 1);
+                        break;
+                    }
+                    case 112: {
+                        // Slow Start; +50% attack, +50% speed
+                        tmpAttack = Math.max((int)(attack / 1.5), 1);
+                        tmpSpeed = Math.max((int)(speed / 1.5), 1);
+                        break;
+                    }
+                    case 54: {
+                        // Truant; +50% HP, +50% attack, +50% sp. attack
+                        tmpHP = Math.max((int)(hp / 1.5), 255);
+                        tmpAttack = Math.max((int)(attack / 1.5), 1);
+                        tmpSpAtk = Math.max((int)(spatk / 1.5), 1);
+                        break;
+                    }
+                }
+            }
+            return tmpHP + tmpAttack + tmpDefense + tmpSpAtk + tmpSpDef + tmpSpeed;
         }
     }
 

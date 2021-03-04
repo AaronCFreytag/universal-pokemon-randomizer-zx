@@ -235,7 +235,7 @@ public class Randomizer {
             romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(), settings.isAllowWonderGuard(),
                     settings.isBanTrappingAbilities(), settings.isBanNegativeAbilities(), settings.isBanBadAbilities(),
                     settings.isAbilitiesFollowMegaEvolutions(), settings.isWeighDuplicateAbilitiesTogether(),
-                    settings.isRetainNumberOfAbilities());
+                    settings.isRetainNumberOfAbilities(), settings.isBalanceBadAbilities());
         }
 
         maybeLogBaseStatAndTypeChanges(log, romHandler);

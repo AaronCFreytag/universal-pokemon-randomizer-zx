@@ -2,7 +2,7 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.dabomstew.pkrandom.newgui.NewRandomizerGUI">
   <grid id="27dc6" binding="mainPanel" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="7" y="20" width="1084" height="816"/>
+      <xy x="7" y="20" width="1146" height="816"/>
     </constraints>
     <properties/>
     <border type="none">
@@ -568,6 +568,17 @@
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.paRetainNumberOfAbilitesCheckbox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.paRetainNumberOfAbilitiesCheckbox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="801d6" class="javax.swing.JCheckBox" binding="paBalanceBadAbilitiesCheckBox">
+                    <constraints>
+                      <grid row="2" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.paBalanceBadAbilitiesCheckBox.name"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.paBalanceBadAbilitiesCheckBox.toolTipText"/>
                     </properties>
                   </component>
                 </children>

@@ -98,6 +98,7 @@ public class Settings {
     private boolean banBadAbilities;
     private boolean weighDuplicateAbilitiesTogether;
     private boolean retainNumberOfAbilities;
+    private boolean balanceBadAbilities;
 
     public enum StartersMod {
         UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
@@ -556,7 +557,8 @@ public class Settings {
 
         // 48 more extra stuff
         out.write(makeByteSelected(retainNumberOfAbilities, trainersNoDuplicatePokemon, trainerBossBoost,
-                randomizeMovesLearnedWithSwap, devolveIllegalWildPokemon, devolveIllegalStaticPokemon));
+                randomizeMovesLearnedWithSwap, devolveIllegalWildPokemon, devolveIllegalStaticPokemon,
+                balanceBadAbilities));
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -837,6 +839,7 @@ public class Settings {
         settings.setRandomizeMovesLearnedWithSwap(restoreState(data[48], 3));
         settings.setDevolveIllegalWildPokemon(restoreState(data[48], 4));
         settings.setDevolveIllegalStaticPokemon(restoreState(data[48], 5));
+        settings.setBalanceBadAbilities(restoreState(data[48], 6));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1261,6 +1264,14 @@ public class Settings {
 
     public void setRetainNumberOfAbilities(boolean retainNumberOfAbilities) {
         this.retainNumberOfAbilities = retainNumberOfAbilities;
+    }
+
+    public boolean isBalanceBadAbilities() {
+        return balanceBadAbilities;
+    }
+
+    public void setBalanceBadAbilities(boolean balanceBadAbilities) {
+        this.balanceBadAbilities = balanceBadAbilities;
     }
 
     public StartersMod getStartersMod() {

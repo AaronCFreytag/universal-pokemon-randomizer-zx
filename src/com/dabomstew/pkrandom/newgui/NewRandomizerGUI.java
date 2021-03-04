@@ -288,6 +288,7 @@ public class NewRandomizerGUI {
     private JCheckBox pmsSwapMovesLearnedWithCheckBox;
     private JCheckBox wpDevolveIllegalEvos;
     private JCheckBox stpDevolveIllegalPokemon;
+    private JCheckBox paBalanceBadAbilitiesCheckBox;
 
     private static JFrame frame;
 
@@ -1324,6 +1325,7 @@ public class NewRandomizerGUI {
         paFollowMegaEvosCheckBox.setSelected(settings.isAbilitiesFollowMegaEvolutions());
         paWeighDuplicatesTogetherCheckBox.setSelected(settings.isWeighDuplicateAbilitiesTogether());
         paRetainNumberOfAbilitiesCheckBox.setSelected(settings.isRetainNumberOfAbilities());
+        paBalanceBadAbilitiesCheckBox.setSelected(settings.isBalanceBadAbilities());
 
         ptRandomFollowEvolutionsRadioButton.setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_FOLLOW_EVOLUTIONS);
         ptRandomCompletelyRadioButton.setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
@@ -1562,6 +1564,7 @@ public class NewRandomizerGUI {
         settings.setAbilitiesFollowMegaEvolutions(paFollowMegaEvosCheckBox.isSelected());
         settings.setWeighDuplicateAbilitiesTogether(paWeighDuplicatesTogetherCheckBox.isSelected());
         settings.setRetainNumberOfAbilities(paRetainNumberOfAbilitiesCheckBox.isSelected());
+        settings.setBalanceBadAbilities(paBalanceBadAbilitiesCheckBox.isSelected());
 
         settings.setTypesMod(ptUnchangedRadioButton.isSelected(), ptRandomFollowEvolutionsRadioButton.isSelected(),
                 ptRandomCompletelyRadioButton.isSelected(), ptRandomAugmentedRadioButton.isSelected());
@@ -1917,6 +1920,9 @@ public class NewRandomizerGUI {
         paBadAbilitiesCheckBox.setVisible(true);
         paBadAbilitiesCheckBox.setEnabled(false);
         paBadAbilitiesCheckBox.setSelected(false);
+        paBalanceBadAbilitiesCheckBox.setVisible(true);
+        paBalanceBadAbilitiesCheckBox.setEnabled(false);
+        paBalanceBadAbilitiesCheckBox.setSelected(false);
         paFollowMegaEvosCheckBox.setVisible(true);
         paFollowMegaEvosCheckBox.setEnabled(false);
         paFollowMegaEvosCheckBox.setSelected(false);
@@ -2518,6 +2524,7 @@ public class NewRandomizerGUI {
                 paTrappingAbilitiesCheckBox.setEnabled(false);
                 paNegativeAbilitiesCheckBox.setEnabled(false);
                 paBadAbilitiesCheckBox.setEnabled(false);
+                paBalanceBadAbilitiesCheckBox.setEnabled(false);
                 paFollowMegaEvosCheckBox.setVisible(romHandler.hasMegaEvolutions());
                 paWeighDuplicatesTogetherCheckBox.setEnabled(false);
                 paRetainNumberOfAbilitiesCheckBox.setEnabled(false);
@@ -2871,6 +2878,7 @@ public class NewRandomizerGUI {
             paFollowMegaEvosCheckBox.setEnabled(true);
             paWeighDuplicatesTogetherCheckBox.setEnabled(true);
             paRetainNumberOfAbilitiesCheckBox.setEnabled(true);
+            paBalanceBadAbilitiesCheckBox.setEnabled(true);
         } else {
             paAllowWonderGuardCheckBox.setEnabled(false);
             paAllowWonderGuardCheckBox.setSelected(false);
@@ -2888,6 +2896,8 @@ public class NewRandomizerGUI {
             paWeighDuplicatesTogetherCheckBox.setSelected(false);
             paRetainNumberOfAbilitiesCheckBox.setEnabled(false);
             paRetainNumberOfAbilitiesCheckBox.setSelected(false);
+            paBalanceBadAbilitiesCheckBox.setEnabled(false);
+            paBalanceBadAbilitiesCheckBox.setSelected(false);
         }
 
         if (peRandomRadioButton.isSelected()) {
