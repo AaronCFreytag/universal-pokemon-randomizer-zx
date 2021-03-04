@@ -3165,20 +3165,20 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (pkmn.secondaryType == null) {
             // Single type
             if (pkmn.primaryType == Type.NORMAL) {
-                // Normal/None: 65% normal, 35% random
-                if (picked < 0.65) {
+                // Normal/None: 60% normal, 40% random
+                if (picked < 0.6) {
                     return Type.NORMAL;
                 }
                 // else random
             }
             else {
-                // Primary/None: 40% primary, 35% normal, 25% random
+                // Primary/None: 40% primary, 30% normal, 30% random
                 if (picked < 0.40) {
                     return pkmn.primaryType;
-                } else if (picked < 0.75) {
+                } else if (picked < 0.7) {
                     // If good damaging move, redistribute normal to other types
                     if (goodDamaging) {
-                        return picked < 0.7 ? pkmn.primaryType : null;
+                        return pkmn.primaryType;
                     }
                     return Type.NORMAL;
                 }
@@ -3189,23 +3189,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Dual type
             if (pkmn.primaryType == Type.NORMAL || pkmn.secondaryType == Type.NORMAL) {
                 Type otherType = pkmn.primaryType == Type.NORMAL ? pkmn.secondaryType : pkmn.primaryType;
-                // Normal/OTHER: 35% normal, 35% other, 30% random
-                if (picked < 0.4) {
+                // Normal/OTHER: 30% normal, 35% other, 35% random
+                if (picked < 0.3) {
                     return Type.NORMAL;
-                } else if (picked < 0.7) {
+                } else if (picked < 0.65) {
                     return otherType;
                 }
                 // else random
             } else {
-                // Primary/Secondary: 35% primary, 20% secondary, 25% normal, 20% random
+                // Primary/Secondary: 35% primary, 20% secondary, 20% normal, 25% random
                 if (picked < 0.35) {
                     return pkmn.primaryType;
                 } else if (picked < 0.55) {
                     return pkmn.secondaryType;
-                } else if (picked < 0.8) {
+                } else if (picked < 0.75) {
                     // If good damaging move, redistribute normal to other types
                     if (goodDamaging) {
-                        return picked < 0.75 ? (picked < 0.65 ? pkmn.primaryType : pkmn.secondaryType) : null;
+                        return picked < 0.65 ? pkmn.primaryType : pkmn.secondaryType;
                     }
                     return Type.NORMAL;
                 }
@@ -3245,7 +3245,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // Ties should be sorted randomly, so shuffle the list first.
             Collections.shuffle(damagingMoves, random);
-
 
             // Sort the damaging moves by power
             damagingMoves.sort(Comparator.comparingDouble(m -> {
