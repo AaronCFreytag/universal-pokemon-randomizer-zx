@@ -527,6 +527,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             Pokemon pkmnToChange = findPokemonInPoolWithSpeciesID(mainPokemonListInclFormes, pkmnNum);
             Pokemon pkmnToCopy = swapsToMake.get(pkmnToChange);
 
+            // If we're a mega, use the un-mega'd pokemon swap for the moveset
+            if (pkmnToChange.megaEvolutionsTo.size() > 0) {
+                pkmnToCopy = swapsToMake.get(pkmnToChange.megaEvolutionsTo.get(0).from);
+            }
+
             // Copy current stats to cache before overriding them
             movesetCache.put(pkmnToChange, movesets.get(pkmnNum));
 
