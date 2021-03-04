@@ -4253,6 +4253,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<String> newTrainerNames = new ArrayList<>();
         List<Integer> tcNameLengths = this.getTCNameLengthsByTrainer();
 
+        List<String>[] unusedTrainerNames = new List[] { new ArrayList(), new ArrayList() };
+        unusedTrainerNames[0].addAll(allTrainerNames[0]);
+        unusedTrainerNames[1].addAll(allTrainerNames[1]);
+
         // loop until we successfully pick names that fit
         // should always succeed first attempt except for gen2.
         while (!success && tries < 10000) {
@@ -4272,16 +4276,18 @@ public abstract class AbstractRomHandler implements RomHandler {
                     totalLength += this.internalStringLength(translation.get(trainerName));
                 } else {
                     int idx = trainerName.contains("&") ? 1 : 0;
-                    List<String> pickFrom = allTrainerNames[idx];
+                    List<String> pickFrom = unusedTrainerNames[idx];
                     int intStrLen = this.internalStringLength(trainerName);
                     if (mode == TrainerNameMode.SAME_LENGTH) {
                         pickFrom = trainerNamesByLength[idx].get(intStrLen);
                     }
                     String changeTo = trainerName;
                     int ctl = intStrLen;
+                    int indexToTry = 0;
                     if (pickFrom != null && pickFrom.size() > 0 && intStrLen > 0) {
                         int innerTries = 0;
-                        changeTo = pickFrom.get(this.cosmeticRandom.nextInt(pickFrom.size()));
+                        indexToTry = this.cosmeticRandom.nextInt(pickFrom.size());
+                        changeTo = pickFrom.get(indexToTry);
                         ctl = this.internalStringLength(changeTo);
                         while ((mode == TrainerNameMode.MAX_LENGTH && ctl > maxLength)
                                 || (mode == TrainerNameMode.MAX_LENGTH_WITH_CLASS && ctl + tcNameLengths.get(tnIndex) > maxLength)) {
@@ -4291,13 +4297,20 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 ctl = intStrLen;
                                 break;
                             }
-                            changeTo = pickFrom.get(this.cosmeticRandom.nextInt(pickFrom.size()));
+                            indexToTry = this.cosmeticRandom.nextInt(pickFrom.size());
+                            changeTo = pickFrom.get(indexToTry);
                             ctl = this.internalStringLength(changeTo);
                         }
                     }
                     translation.put(trainerName, changeTo);
                     newTrainerNames.add(changeTo);
                     totalLength += ctl;
+                    if (mode == TrainerNameMode.MAX_LENGTH) {
+                        pickFrom.remove(indexToTry);
+                        if (pickFrom.size() == 0) {
+                            pickFrom.addAll(allTrainerNames[idx]);
+                        }
+                    }
                 }
 
                 if (totalLength > totalMaxLength) {
