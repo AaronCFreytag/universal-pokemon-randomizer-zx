@@ -398,7 +398,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
-            if (pk != null && pk.actuallyCosmetic) {
+            if (pk != null && pk.actuallyCosmetic && swaps.containsKey(pk.baseForme)) {
                 pk.copyBaseFormeBaseStats(pk.baseForme);
                 swaps.put(pk, swaps.get(pk.baseForme));
             }
