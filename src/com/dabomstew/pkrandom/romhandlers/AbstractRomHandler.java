@@ -868,10 +868,15 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void augmentPokemonTypes(boolean megaEvolutionSanity) {
         List<Pokemon> allPokes = this.getPokemonInclFormes();
+        List<Pokemon> eligibleMegas = new ArrayList<>();
         Set<Pokemon> eligibleMons = new HashSet<>();
         for (Pokemon pk : allPokes) {
             if (pk != null && pk.evolutionsFrom.size() == 0) {
                 boolean eligible = pk.secondaryType == null;
+                if (pk.megaEvolutionsTo.size() > 0 && eligible && megaEvolutionSanity) {
+                    eligibleMegas.add(pk);
+                    continue;
+                }
                 if (eligible) {
                     // If any final evolution is eligible, go down the line and
                     // Find other eligible pokemon
@@ -919,15 +924,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }, false);
 
+        // With mega evolution sanity, do the eligible megas last
+        for (Pokemon pk : eligibleMegas) {
+            Pokemon original = pk.megaEvolutionsTo.get(0).from;
+            double probability = 0.4;
+            if (AbstractRomHandler.this.random.nextDouble() < probability) {
+                pk.secondaryType = randomType();
+            }
+            else if (eligibleMons.contains(original)) {
+                pk.secondaryType = original.secondaryType;
+            }
+        }
+
         for (Pokemon pk : allPokes) {
             if (pk != null && pk.actuallyCosmetic) {
                 pk.primaryType = pk.baseForme.primaryType;
                 pk.secondaryType = pk.baseForme.secondaryType;
             }
-        }
-
-        if (megaEvolutionSanity) {
-            // Figure out what to do with mega evolution sanity later
         }
     }
 
