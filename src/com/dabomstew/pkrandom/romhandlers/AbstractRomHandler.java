@@ -460,7 +460,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             Pokemon pkmnToCopyStats = resultList.get(i);
             while (pkmnToChange != null && pkmnToCopyStats != null) {
                 // Copy current stats to cache before overriding them
-                statsCache.put(pkmnToChange, List.of(
+                statsCache.put(pkmnToChange, Arrays.asList(
                         pkmnToChange.hp, pkmnToChange.attack, pkmnToChange.defense,
                         pkmnToChange.spatk, pkmnToChange.spdef, pkmnToChange.speed,
                         pkmnToChange.special, pkmnToChange.catchRate
@@ -472,7 +472,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 expCurveCache.put(pkmnToChange, pkmnToChange.growthCurve);
 
                 // Randomize stats, prioritizing cached values
-                List<Integer> statsCopyList = List.of(
+                List<Integer> statsCopyList = Arrays.asList(
                         pkmnToCopyStats.hp, pkmnToCopyStats.attack, pkmnToCopyStats.defense,
                         pkmnToCopyStats.spatk, pkmnToCopyStats.spdef, pkmnToCopyStats.speed,
                         pkmnToCopyStats.special, pkmnToCopyStats.catchRate
@@ -3206,7 +3206,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (attemptDamaging) {
                     // Pick damaging move based on atk/spatk ratio
                     double threshold = Math.pow(pkmn.attack, 3) / (Math.pow(pkmn.attack, 3) + Math.pow(pkmn.spatk, 3));
-                    List<Integer> tryOrder = random.nextDouble() < threshold ? List.of(0, 1) : List.of(1, 0);
+                    List<Integer> tryOrder = random.nextDouble() < threshold ? Arrays.asList(0, 1) : Arrays.asList(1, 0);
                     for (int categoryIndex : tryOrder) {
                         if (typeOfMove != null) {
                             if (validTypeDamagingMoves.containsKey(typeOfMove)
