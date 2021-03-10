@@ -317,10 +317,10 @@ public class NewRandomizerGUI {
 
     private JPopupMenu settingsMenu;
     private JMenuItem customNamesEditorMenuItem;
-    private JMenuItem updateOldSettingsMenuItem;
     private JMenuItem applyGameUpdateMenuItem;
     private JMenuItem removeGameUpdateMenuItem;
     private JMenuItem loadGetSettingsMenuItem;
+    private JMenuItem keepOrUnloadGameAfterRandomizingMenuItem;
 
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
     private boolean haveCheckedCustomNames, unloadGameOnSuccess;
@@ -480,11 +480,11 @@ public class NewRandomizerGUI {
         loadSettingsButton.addActionListener(e -> loadQS());
         saveSettingsButton.addActionListener(e -> saveQS());
         settingsButton.addActionListener(e -> settingsMenu.show(settingsButton,0,settingsButton.getHeight()));
-        updateOldSettingsMenuItem.addActionListener(e -> updateOldSettingsMenuItemActionPerformed());
         customNamesEditorMenuItem.addActionListener(e -> new CustomNamesEditorDialog(frame));
         applyGameUpdateMenuItem.addActionListener(e -> applyGameUpdateMenuItemActionPerformed());
         removeGameUpdateMenuItem.addActionListener(e -> removeGameUpdateMenuItemActionPerformed());
         loadGetSettingsMenuItem.addActionListener(e -> loadGetSettingsMenuItemActionPerformed());
+        keepOrUnloadGameAfterRandomizingMenuItem.addActionListener(e -> keepOrUnloadGameAfterRandomizingMenuItemActionPerformed());
         limitPokemonButton.addActionListener(e -> {
             NewGenerationLimitDialog gld = new NewGenerationLimitDialog(frame, currentRestrictions,
                     romHandler.generationOfPokemon(), romHandler.forceSwapStaticMegaEvos());
@@ -634,10 +634,6 @@ public class NewRandomizerGUI {
         customNamesEditorMenuItem.setText(bundle.getString("GUI.customNamesEditorMenuItem.text"));
         settingsMenu.add(customNamesEditorMenuItem);
 
-        updateOldSettingsMenuItem = new JMenuItem();
-        updateOldSettingsMenuItem.setText(bundle.getString("GUI.updateOldSettingsMenuItem.text"));
-        settingsMenu.add(updateOldSettingsMenuItem);
-
         loadGetSettingsMenuItem = new JMenuItem();
         loadGetSettingsMenuItem.setText(bundle.getString("GUI.loadGetSettingsMenuItem.text"));
         settingsMenu.add(loadGetSettingsMenuItem);
@@ -649,6 +645,14 @@ public class NewRandomizerGUI {
         removeGameUpdateMenuItem = new JMenuItem();
         removeGameUpdateMenuItem.setText(bundle.getString("GUI.removeGameUpdateMenuItem.text"));
         settingsMenu.add(removeGameUpdateMenuItem);
+
+        keepOrUnloadGameAfterRandomizingMenuItem = new JMenuItem();
+        if (this.unloadGameOnSuccess) {
+            keepOrUnloadGameAfterRandomizingMenuItem.setText(bundle.getString("GUI.keepGameLoadedAfterRandomizingMenuItem.text"));
+        } else {
+            keepOrUnloadGameAfterRandomizingMenuItem.setText(bundle.getString("GUI.unloadGameAfterRandomizingMenuItem.text"));
+        }
+        settingsMenu.add(keepOrUnloadGameAfterRandomizingMenuItem);
     }
 
     private void loadROM() {
@@ -964,6 +968,8 @@ public class NewRandomizerGUI {
                             if (this.unloadGameOnSuccess) {
                                 romHandler = null;
                                 initialState();
+                            } else {
+                                reinitializeRomHandler();
                             }
                         } else {
                             // Compile a config string
@@ -980,6 +986,8 @@ public class NewRandomizerGUI {
                             if (this.unloadGameOnSuccess) {
                                 romHandler = null;
                                 initialState();
+                            } else {
+                                reinitializeRomHandler();
                             }
                         }
                     });
@@ -1114,43 +1122,6 @@ public class NewRandomizerGUI {
         return saveType;
     }
 
-    private void updateOldSettingsMenuItemActionPerformed() {
-
-        qsUpdateChooser.setSelectedFile(null);
-        int returnVal = qsUpdateChooser.showOpenDialog(frame);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File fh = qsUpdateChooser.getSelectedFile();
-            try {
-                FileInputStream in = new FileInputStream(fh);
-                int version = in.read();
-                if (version == 0 || version > 172) {
-                    JOptionPane.showMessageDialog(frame, bundle.getString("GUI.oldSettingsFileInvalid"));
-                    in.close();
-                    return;
-                }
-                int length = in.read();
-                byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
-                in.close();
-
-                ByteBuffer buf = ByteBuffer.allocate(length + 8);
-                buf.putInt(version);
-                buf.putInt(length);
-                buf.put(buffer);
-
-                FileOutputStream out = new FileOutputStream(fh);
-                out.write(buf.array());
-                out.close();
-                JOptionPane.showMessageDialog(frame, bundle.getString("GUI.oldSettingsFileUpdated"));
-            } catch (IllegalArgumentException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(frame, bundle.getString("GUI.invalidSettingsFile"));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(frame, bundle.getString("GUI.settingsLoadFailed"));
-            }
-        }
-    }
-
     private void applyGameUpdateMenuItemActionPerformed() {
 
         if (romHandler == null) return;
@@ -1260,6 +1231,18 @@ public class NewRandomizerGUI {
         }
     }
 
+    private void keepOrUnloadGameAfterRandomizingMenuItemActionPerformed() {
+        this.unloadGameOnSuccess = !this.unloadGameOnSuccess;
+        if (this.unloadGameOnSuccess) {
+            JOptionPane.showMessageDialog(frame, bundle.getString("GUI.unloadGameAfterRandomizing"));
+            keepOrUnloadGameAfterRandomizingMenuItem.setText(bundle.getString("GUI.keepGameLoadedAfterRandomizingMenuItem.text"));
+        } else {
+            JOptionPane.showMessageDialog(frame, bundle.getString("GUI.keepGameLoadedAfterRandomizing"));
+            keepOrUnloadGameAfterRandomizingMenuItem.setText(bundle.getString("GUI.unloadGameAfterRandomizingMenuItem.text"));
+        }
+        attemptWriteConfig();
+    }
+
     private void showMessageDialogWithLink(String text, String url) {
         JLabel label = new JLabel("<html><a href=\"" + url + "\">For more information, click here.</a>");
         label.addMouseListener(new MouseAdapter() {
@@ -1276,6 +1259,36 @@ public class NewRandomizerGUI {
         label.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
         Object[] messages = {text,label};
         JOptionPane.showMessageDialog(frame, messages);
+    }
+
+    // This is only intended to be used with the "Keep Game Loaded After Randomizing" setting; it assumes that
+    // the game has already been loaded once, and we just need to reload the same game to reinitialize the
+    // RomHandler. Don't use this for other purposes unless you know what you're doing.
+    private void reinitializeRomHandler() {
+        String currentFN = this.romHandler.loadedFilename();
+        for (RomHandler.Factory rhf : checkHandlers) {
+            if (rhf.isLoadable(currentFN)) {
+                this.romHandler = rhf.create(RandomSource.instance());
+                opDialog = new OperationDialog(bundle.getString("GUI.loadingText"), frame, true);
+                Thread t = new Thread(() -> {
+                    SwingUtilities.invokeLater(() -> opDialog.setVisible(true));
+                    try {
+                        this.romHandler.loadRom(currentFN);
+                        if (gameUpdates.containsKey(this.romHandler.getROMCode())) {
+                            this.romHandler.loadGameUpdate(gameUpdates.get(this.romHandler.getROMCode()));
+                        }
+                    } catch (Exception ex) {
+                        attemptToLogException(ex, "GUI.loadFailed", "GUI.loadFailedNoLog", null, null);
+                    }
+                    SwingUtilities.invokeLater(() -> {
+                        this.opDialog.setVisible(false);
+                    });
+                });
+                t.start();
+
+                return;
+            }
+        }
     }
 
     private void restoreStateFromSettings(Settings settings) {
@@ -1899,6 +1912,7 @@ public class NewRandomizerGUI {
         ptFollowMegaEvosCheckBox.setVisible(true);
         ptFollowMegaEvosCheckBox.setEnabled(false);
         ptFollowMegaEvosCheckBox.setSelected(false);
+        pokemonAbilitiesPanel.setVisible(true);
         paUnchangedRadioButton.setVisible(true);
         paUnchangedRadioButton.setEnabled(false);
         paUnchangedRadioButton.setSelected(false);
@@ -2653,13 +2667,13 @@ public class NewRandomizerGUI {
 
             tpAdditionalPokemonForLabel.setVisible(additionalPokemonAvailable);
             tpBossTrainersCheckBox.setVisible(additionalPokemonAvailable);
-            tpBossTrainersCheckBox.setEnabled(additionalPokemonAvailable);
+            tpBossTrainersCheckBox.setEnabled(false);
             tpBossTrainersSpinner.setVisible(additionalPokemonAvailable);
             tpImportantTrainersCheckBox.setVisible(additionalPokemonAvailable);
-            tpImportantTrainersCheckBox.setEnabled(additionalPokemonAvailable);
+            tpImportantTrainersCheckBox.setEnabled(false);
             tpImportantTrainersSpinner.setVisible(additionalPokemonAvailable);
             tpRegularTrainersCheckBox.setVisible(additionalPokemonAvailable);
-            tpRegularTrainersCheckBox.setEnabled(additionalPokemonAvailable);
+            tpRegularTrainersCheckBox.setEnabled(false);
             tpRegularTrainersSpinner.setVisible(additionalPokemonAvailable);
 
 
@@ -3043,6 +3057,12 @@ public class NewRandomizerGUI {
             tpSwapMegaEvosCheckBox.setSelected(false);
             tpRandomShinyTrainerPokemonCheckBox.setEnabled(false);
             tpRandomShinyTrainerPokemonCheckBox.setSelected(false);
+            tpBossTrainersCheckBox.setEnabled(false);
+            tpBossTrainersCheckBox.setSelected(false);
+            tpImportantTrainersCheckBox.setEnabled(false);
+            tpImportantTrainersCheckBox.setSelected(false);
+            tpRegularTrainersCheckBox.setEnabled(false);
+            tpRegularTrainersCheckBox.setSelected(false);
         } else {
             tpSimilarStrengthCheckBox.setEnabled(true);
             tpDontUseLegendariesCheckBox.setEnabled(true);
@@ -3055,6 +3075,9 @@ public class NewRandomizerGUI {
                 tpSwapMegaEvosCheckBox.setSelected(false);
             }
             tpRandomShinyTrainerPokemonCheckBox.setEnabled(true);
+            tpBossTrainersCheckBox.setEnabled(tpBossTrainersCheckBox.isVisible());
+            tpImportantTrainersCheckBox.setEnabled(tpImportantTrainersCheckBox.isVisible());
+            tpRegularTrainersCheckBox.setEnabled(tpRegularTrainersCheckBox.isVisible());
             tpNoDuplicatePokemon.setEnabled(true);
             if (tpSimilarStrengthCheckBox.isSelected()) {
                 tpBossBoost.setEnabled(true);
@@ -3494,6 +3517,8 @@ public class NewRandomizerGUI {
     }
 
     private void attemptReadConfig() {
+        // Things that should be true by default should be manually set here
+        unloadGameOnSuccess = true;
         File fh = new File(SysConstants.ROOT_PATH + "config.ini");
         if (!fh.exists() || !fh.canRead()) {
             return;
@@ -3551,7 +3576,7 @@ public class NewRandomizerGUI {
             PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
             ps.println("checkedcustomnames=true");
             ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
-            ps.println("unloadgameonsuccess=true");
+            ps.println("unloadgameonsuccess=" + unloadGameOnSuccess);
             if (!initialPopup) {
                 ps.println("firststart=" + Version.VERSION_STRING);
             }

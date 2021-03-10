@@ -3671,6 +3671,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
             }
+            setPokemonAndFormeForStaticEncounter(se, se.pkmn);
         }
         this.setStaticPokemon(currentStaticPokemon);
     }
@@ -6063,6 +6064,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (levelModifier != 0) {
                     newTotem.level = Math.min(100, (int) Math.round(newTotem.level * (1 + levelModifier / 100.0)));
                 }
+                setFormeForStaticEncounter(newTotem, newTotem.pkmn);
             }
 
             if (randomizeAllies) {
@@ -6105,6 +6107,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (StaticEncounter ally: newTotem.allies.values()) {
                     if (levelModifier != 0) {
                         ally.level = Math.min(100, (int) Math.round(ally.level * (1 + levelModifier / 100.0)));
+                        setFormeForStaticEncounter(ally, ally.pkmn);
                     }
                 }
             }

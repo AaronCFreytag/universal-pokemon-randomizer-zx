@@ -2192,6 +2192,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         available |= MiscTweak.FASTEST_TEXT.getValue();
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.RETAIN_ALT_FORMES.getValue();
+        available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
         return available;
     }
 
@@ -2208,6 +2209,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
+            patchForNationalDex();
         }
     }
 
@@ -2227,6 +2230,39 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             code[offset + 1] = 0x50;
             code[offset + 2] = (byte) 0xA0;
             code[offset + 3] = (byte) 0xE3;
+        }
+    }
+
+    private void patchForNationalDex() {
+        int offset = find(code, Gen6Constants.nationalDexFunctionLocator);
+        if (offset > 0) {
+            // In Savedata::ZukanData::GetZenkokuZukanFlag, we load a flag into r0 and
+            // then AND it with 0x1 to get a boolean that determines if the player has
+            // the National Dex. The below code patches this piece of code so that
+            // instead of loading the flag, we simply "mov r0, #0x1".
+            code[offset] = 0x01;
+            code[offset + 1] = 0x00;
+            code[offset + 2] = (byte) 0xA0;
+            code[offset + 3] = (byte) 0xE3;
+        }
+
+        if (romEntry.romType == Gen6Constants.Type_XY) {
+            offset = find(code, Gen6Constants.xyGetDexFlagFunctionLocator);
+            if (offset > 0) {
+                // In addition to the code listed above, XY also use a function that I'm
+                // calling Savedata::ZukanData::GetDexFlag(int) to determine what Pokedexes
+                // the player owns. It can be called with 0 (Central), 1 (Coastal), 2 (Mountain),
+                // or 3 (National). Since the player *always* has the Central Dex, the code has
+                // a short-circuit for it that looks like this:
+                // cmp r5, #0x0
+                // moveq r0, #0x1
+                // beq returnFromFunction
+                // The below code nops out that comparison and makes the move and branch instructions
+                // non-conditional; no matter what's on the save file, the player will have all dexes.
+                FileFunctions.writeFullIntLittleEndian(code, offset, 0);
+                code[offset + 7] = (byte) 0xE3;
+                code[offset + 11] = (byte) 0xEA;
+            }
         }
     }
 
