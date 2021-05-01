@@ -23,13 +23,11 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.Gen6Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
@@ -278,7 +276,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
 
         allowedItems = Gen6Constants.getAllowedItems(romEntry.romType).copy();
-        nonBadItems = Gen6Constants.nonBadItems.copy();
+        nonBadItems = Gen6Constants.getNonBadItems(romEntry.romType).copy();
     }
 
     private void loadPokemonStats() {
@@ -381,13 +379,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     for (int i = 1; i < formeCount; i++) {
                         altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
                         if (Gen6Constants.actuallyCosmeticForms.contains(firstFormeOffset+i-1)) {
-                            if (pkmn.number != 25 && pkmn.number != 421) { // No Pikachu/Cherrim
+                            if (pkmn.number != Species.pikachu && pkmn.number != Species.cherrim) { // No Pikachu/Cherrim
                                 pkmn.cosmeticForms += 1;
                             }
                         }
                     }
                 } else {
-                    if (pkmn.number != 493 && pkmn.number != 649 && pkmn.number != 716) {
+                    if (pkmn.number != Species.arceus && pkmn.number != Species.genesect && pkmn.number != Species.xerneas) {
                         // Reason for exclusions:
                         // Arceus/Genesect: to avoid confusion
                         // Xerneas: Should be handled automatically?
@@ -441,8 +439,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
                 // Nincada's Shedinja evo is hardcoded into the game's executable, so
                 // if the Pokemon is Nincada, then let's put it as one of its evolutions
-                if (pk.number == 290) {
-                    Pokemon shedinja = pokes[292];
+                if (pk.number == Species.nincada) {
+                    Pokemon shedinja = pokes[Species.shedinja];
                     Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
                     pk.evolutionsFrom.add(evol);
                     shedinja.evolutionsTo.add(evol);
@@ -663,7 +661,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
-                if (pk.number == 290) {
+                if (pk.number == Species.nincada) {
                     writeShedinjaEvolution();
                 }
                 int evosWritten = 0;
@@ -690,7 +688,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     private void writeShedinjaEvolution() throws IOException {
-        Pokemon nincada = pokes[290];
+        Pokemon nincada = pokes[Species.nincada];
 
         // When the "Limit Pokemon" setting is enabled, we clear out the evolutions of
         // everything *not* in the pool, which could include Nincada. In that case,
@@ -1735,11 +1733,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             .getOrDefault(species,dummyAbsolutePokeNums)
                             .getOrDefault(formnum,species);
                     pokeOffs += 8;
-                    if ((tr.poketype & 2) == 2) {
+                    if (tr.pokemonHaveItems()) {
                         tpk.heldItem = readWord(trpoke, pokeOffs);
                         pokeOffs += 2;
+                        tpk.hasMegaStone = Gen6Constants.isMegaStone(tpk.heldItem);
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if (tr.pokemonHaveCustomMoves()) {
                         int attack1 = readWord(trpoke, pokeOffs);
                         int attack2 = readWord(trpoke, pokeOffs + 2);
                         int attack3 = readWord(trpoke, pokeOffs + 4);
@@ -1812,10 +1811,10 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
 
                 int bytesNeeded = 8 * numPokes;
-                if ((tr.poketype & 1) == 1) {
+                if (tr.pokemonHaveCustomMoves()) {
                     bytesNeeded += 8 * numPokes;
                 }
-                if ((tr.poketype & 2) == 2) {
+                if (tr.pokemonHaveItems()) {
                     bytesNeeded += 2 * numPokes;
                 }
                 byte[] trpoke = new byte[bytesNeeded];
@@ -1829,11 +1828,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
                     writeWord(trpoke, pokeOffs + 6, tp.forme);
                     pokeOffs += 8;
-                    if ((tr.poketype & 2) == 2) {
+                    if (tr.pokemonHaveItems()) {
                         writeWord(trpoke, pokeOffs, tp.heldItem);
                         pokeOffs += 2;
                     }
-                    if ((tr.poketype & 1) == 1) {
+                    if (tr.pokemonHaveCustomMoves()) {
                         if (tp.resetMoves) {
                             int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.absolutePokeNumber, movesets, tp.level);
                             for (int m = 0; m < 4; m++) {
@@ -2568,8 +2567,23 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasMainGameLegendaries() {
+        return true;
+    }
+
+    @Override
     public List<Integer> getMainGameLegendaries() {
         return Arrays.stream(romEntry.arrayEntries.get("MainGameLegendaries")).boxed().collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Integer> getSpecialMusicStatics() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void applyCorrectStaticMusic(Map<Integer, Integer> specialMusicStaticChanges) {
+
     }
 
     @Override
@@ -2583,9 +2597,10 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void removeImpossibleEvolutions(boolean changeMoveEvos) {
+    public void removeImpossibleEvolutions(Settings settings) {
+        boolean changeMoveEvos = !(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
+
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        log("--Removing Impossible Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -2608,29 +2623,29 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         // change to pure level evo
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = levelLearntAt;
-                        logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), levelLearntAt);
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Pure Trade
                     if (evo.type == EvolutionType.TRADE) {
                         // Replace w/ level 37
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
-                        logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), 37);
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Trade w/ Item
                     if (evo.type == EvolutionType.TRADE_ITEM) {
                         // Get the current item & evolution
                         int item = evo.extraInfo;
-                        if (evo.from.number == Gen6Constants.slowpokeIndex) {
+                        if (evo.from.number == Species.slowpoke) {
                             // Slowpoke is awkward - he already has a level evo
                             // So we can't do Level up w/ Held Item for him
                             // Put Water Stone instead
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen6Constants.waterStoneIndex; // water
                             // stone
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen6Constants.waterStoneIndex));
+                            addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
-                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            addEvoUpdateHeldItem(impossibleEvolutionUpdates, evo, itemNames.get(item));
                             // Replace, for this entry, w/
                             // Level up w/ Held Item at Day
                             evo.type = EvolutionType.LEVEL_ITEM_DAY;
@@ -2647,11 +2662,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         // (22)
                         // Based on what species we're currently dealing with
                         evo.type = EvolutionType.LEVEL_WITH_OTHER;
-                        evo.extraInfo = (evo.from.number == Gen6Constants.karrablastIndex ? Gen6Constants.shelmetIndex
-                                : Gen6Constants.karrablastIndex);
-                        logEvoChangeLevelWithPkmn(evo.from.fullName(), evo.to.fullName(),
-                                pokes[(evo.from.number == Gen6Constants.karrablastIndex ? Gen6Constants.shelmetIndex
-                                        : Gen6Constants.karrablastIndex)].fullName());
+                        evo.extraInfo = (evo.from.number == Species.karrablast ? Species.shelmet : Species.karrablast);
+                        addEvoUpdateParty(impossibleEvolutionUpdates, evo, pokes[evo.extraInfo].fullName());
                     }
                     // TBD: Pancham, Sliggoo? Sylveon?
                 }
@@ -2662,11 +2674,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
         }
-        logBlankLine();
+
     }
 
     @Override
-    public void makeEvolutionsEasier(boolean wildsRandomized) {
+    public void makeEvolutionsEasier(Settings settings) {
+        boolean wildsRandomized = !settings.getWildPokemonMod().equals(Settings.WildPokemonMod.UNCHANGED);
+
         if (wildsRandomized) {
             for (Pokemon pkmn : pokes) {
                 if (pkmn != null) {
@@ -2675,48 +2689,45 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             // Replace w/ level 35
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 35;
-                            log(String.format("%s now evolves into %s at minimum level %d", evo.from.fullName(), evo.to.fullName(),
-                                    evo.extraInfo));
+                            addEvoUpdateCondensed(easierEvolutionUpdates, evo, false);
                         }
                     }
                 }
             }
-            logBlankLine();
         }
     }
 
     @Override
     public void removeTimeBasedEvolutions() {
-        log("--Removing Timed-Based Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 extraEvolutions.clear();
                 for (Evolution evo : pkmn.evolutionsFrom) {
                     if (evo.type == EvolutionType.HAPPINESS_DAY) {
-                        if (evo.from.number == Gen6Constants.eeveeIndex) {
+                        if (evo.from.number == Species.eevee) {
                             // We can't set Eevee to evolve into Espeon with happiness at night because that's how
                             // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen6Constants.sunStoneIndex;
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen6Constants.sunStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
                             // Add an extra evo for Happiness at Night
-                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.HAPPINESS_NIGHT, 0);
                             extraEvolutions.add(extraEntry);
                         }
                     } else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
-                        if (evo.from.number == Gen6Constants.eeveeIndex) {
+                        if (evo.from.number == Species.eevee) {
                             // We can't set Eevee to evolve into Umbreon with happiness at day because that's how
                             // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen6Constants.moonStoneIndex;
-                            logEvoChangeStone(evo.from.fullName(), evo.to.fullName(), itemNames.get(Gen6Constants.moonStoneIndex));
+                            addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
                             // Add an extra evo for Happiness at Day
-                            logEvoChangeHappiness(evo.from.fullName(), evo.to.fullName());
+                            addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.HAPPINESS_DAY, 0);
                             extraEvolutions.add(extraEntry);
@@ -2726,7 +2737,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         // Make sure we don't already have an evo for the same item at night (e.g., when using Change Impossible Evos)
                         if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_NIGHT && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Night
-                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEvolutions.add(extraEntry);
@@ -2736,13 +2747,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         // Make sure we don't already have an evo for the same item at day (e.g., when using Change Impossible Evos)
                         if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_DAY && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Day
-                            logEvoChangeLevelWithItem(evo.from.fullName(), evo.to.fullName(), itemNames.get(item));
+                            addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_DAY, item);
                             extraEvolutions.add(extraEntry);
                         }
                     } else if (evo.type == EvolutionType.LEVEL_DAY || evo.type == EvolutionType.LEVEL_NIGHT) {
-                        logEvoChangeLevel(evo.from.fullName(), evo.to.fullName(), evo.extraInfo);
+                        addEvoUpdateLevel(timeBasedEvolutionUpdates, evo);
                         evo.type = EvolutionType.LEVEL;
                     }
                 }
@@ -2752,7 +2763,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
         }
-        logBlankLine();
+
     }
 
     @Override
@@ -2867,8 +2878,101 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void applySignature() {
-        // For now, do nothing.
+    public void randomizeIntroPokemon() {
+
+        if (romEntry.romType == Gen6Constants.Type_XY) {
+
+            // Pick a random Pokemon, including formes
+
+            Pokemon introPokemon = randomPokemonInclFormes();
+            while (introPokemon.actuallyCosmetic) {
+                introPokemon = randomPokemonInclFormes();
+            }
+            int introPokemonNum = introPokemon.number;
+            int introPokemonForme = 0;
+            boolean checkCosmetics = true;
+            if (introPokemon.formeNumber > 0) {
+                introPokemonForme = introPokemon.formeNumber;
+                introPokemonNum = introPokemon.baseForme.number;
+                checkCosmetics = false;
+            }
+            if (checkCosmetics && introPokemon.cosmeticForms > 0) {
+                introPokemonForme = introPokemon.getCosmeticFormNumber(this.random.nextInt(introPokemon.cosmeticForms));
+            } else if (!checkCosmetics && introPokemon.cosmeticForms > 0) {
+                introPokemonForme += introPokemon.getCosmeticFormNumber(this.random.nextInt(introPokemon.cosmeticForms));
+            }
+
+            // Find the value for the Pokemon's cry
+
+            int baseAddr = find(code, Gen6Constants.criesTablePrefixXY);
+            baseAddr += Gen6Constants.criesTablePrefixXY.length() / 2;
+
+            int pkNumKey = introPokemonNum;
+
+            if (introPokemonForme != 0) {
+                int extraOffset = readLong(code, baseAddr + (pkNumKey * 0x14));
+                pkNumKey = extraOffset + (introPokemonForme - 1);
+            }
+
+            int initialCry = readLong(code, baseAddr + (pkNumKey * 0x14) + 0x4);
+            int repeatedCry = readLong(code, baseAddr + (pkNumKey * 0x14) + 0x10);
+
+            // Write to DLLIntro.cro
+            try {
+                byte[] introCRO = readFile(romEntry.getString("Intro"));
+
+                // Replace the Pokemon model that's loaded, and set its forme
+
+                int croModelOffset = find(introCRO, Gen6Constants.introPokemonModelOffsetXY);
+                croModelOffset += Gen6Constants.introPokemonModelOffsetXY.length() / 2;
+
+                writeWord(introCRO, croModelOffset, introPokemonNum);
+                introCRO[croModelOffset + 2] = (byte)introPokemonForme;
+
+                // Shiny chance
+                if (this.random.nextInt(256) == 0) {
+                    introCRO[croModelOffset + 4] = 1;
+                }
+
+                // Replace the initial cry when the Pokemon exits the ball
+                // First, re-point two branches
+
+                int croInitialCryOffset1 = find(introCRO, Gen6Constants.introInitialCryOffset1XY);
+                croInitialCryOffset1 += Gen6Constants.introInitialCryOffset1XY.length() / 2;
+
+                introCRO[croInitialCryOffset1] = 0x5E;
+
+                int croInitialCryOffset2 = find(introCRO, Gen6Constants.introInitialCryOffset2XY);
+                croInitialCryOffset2 += Gen6Constants.introInitialCryOffset2XY.length() / 2;
+
+                introCRO[croInitialCryOffset2] = 0x2F;
+
+                // Then change the parameters that are loaded for a function call, and also change the function call
+                // itself to a function that uses the "cry value" instead of Pokemon ID + forme + emotion (same function
+                // that is used for the repeated cries)
+
+                int croInitialCryOffset3 = find(introCRO, Gen6Constants.introInitialCryOffset3XY);
+                croInitialCryOffset3 += Gen6Constants.introInitialCryOffset3XY.length() / 2;
+
+                writeLong(introCRO, croInitialCryOffset3, 0xE1A02000);  // cpy r2,r0
+                writeLong(introCRO, croInitialCryOffset3 + 0x4, 0xE59F100C);    // ldr r1,=#CRY_VALUE
+                writeLong(introCRO, croInitialCryOffset3 + 0x8, 0xE58D0000);    // str r0,[sp]
+                writeLong(introCRO, croInitialCryOffset3 + 0xC, 0xEBFFFDE9);    // bl FUN_006a51d4
+                writeLong(introCRO, croInitialCryOffset3 + 0x10, readLong(introCRO, croInitialCryOffset3 + 0x14)); // Move these two instructions up four bytes
+                writeLong(introCRO, croInitialCryOffset3 + 0x14, readLong(introCRO, croInitialCryOffset3 + 0x18));
+                writeLong(introCRO, croInitialCryOffset3 + 0x18, initialCry);   // CRY_VALUE pool
+
+                // Replace the repeated cry that the Pokemon does while standing around
+                // Just replace a pool value
+                int croRepeatedCryOffset = find(introCRO, Gen6Constants.introRepeatedCryOffsetXY);
+                croRepeatedCryOffset += Gen6Constants.introRepeatedCryOffsetXY.length() / 2;
+                writeLong(introCRO, croRepeatedCryOffset, repeatedCry);
+
+                writeFile(romEntry.getString("Intro"), introCRO);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -2879,6 +2983,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public ItemList getNonBadItems() {
         return nonBadItems;
+    }
+
+    @Override
+    public List<Integer> getUniqueNoSellItems() {
+        return Gen6Constants.uniqueNoSellItems;
     }
 
     @Override
@@ -2909,6 +3018,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public Map<Integer, List<Integer>> getAbilityVariations() {
         return Gen5Constants.abilityVariations;
+    }
+
+    @Override
+    public List<Integer> getUselessAbilities() {
+        return new ArrayList<>(Gen6Constants.uselessAbilities);
     }
 
     @Override
@@ -3336,11 +3450,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public int randomHeldItem() {
-        return 0;
-    }
-
-    @Override
     public BufferedImage getMascotImage() {
         try {
             GARCArchive pokespritesGARC = this.readGARC(romEntry.getString("PokemonGraphics"),false);
@@ -3386,5 +3495,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    @Override
+    public List<Integer> getAllHeldItems() {
+        return Gen6Constants.allHeldItems;
+    }
+
+    @Override
+    public List<Integer> getAllConsumableHeldItems() {
+        return Gen6Constants.consumableHeldItems;
     }
 }

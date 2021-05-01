@@ -44,6 +44,8 @@ public class Gen3Constants {
     public static final int romNameOffset = 0xA0, romCodeOffset = 0xAC, romVersionOffset = 0xBC,
             headerChecksumOffset = 0xBD;
 
+    public static final int pokemonCount = 386;
+
     public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000";
 
     public static final String mapBanksPointerPrefix = "80180068890B091808687047";
@@ -102,9 +104,6 @@ public class Gen3Constants {
 
     public static final int grassSlots = 12, surfingSlots = 5, rockSmashSlots = 5, fishingSlots = 10;
 
-    public static final int unownIndex = 201, slowpokeIndex = 79, seadraIndex = 117, poliwhirlIndex = 61,
-            mewIndex = 151, clamperlIndex = 366, huntailIndex = 367, gorebyssIndex = 368;
-
     public static final int tmCount = 50, hmCount = 8;
 
     public static final List<Integer> hmMoves = Arrays.asList(0xf, 0x13, 0x39, 0x46, 0x94, 0xf9, 0x7f, 0x123);
@@ -161,23 +160,24 @@ public class Gen3Constants {
 
     public static final int evolutionMethodCount = 15;
 
-    public static final int sunStoneIndex = 93, moonStoneIndex = 94, waterStoneIndex = 97;
+    public static final int sunStoneIndex = 93, moonStoneIndex = 94, waterStoneIndex = 97, deepSeaToothIndex = 192, deepSeaScaleIndex = 193;
 
-    public static final int highestAbilityIndex = 77;
+    public static final int cacophonyIndex = 76, airLockIndex = 77, highestAbilityIndex = 77;
 
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 
     private static Map<Integer,List<Integer>> setupAbilityVariations() {
         Map<Integer,List<Integer>> map = new HashMap<>();
-        map.put(15,Arrays.asList(15,72)); // Insomnia/Vital Spirit
-        map.put(29,Arrays.asList(29,73)); // Clear Body/White Smoke
-        map.put(37,Arrays.asList(37,74)); // Huge Power/Pure Power
-        map.put(4,Arrays.asList(4,75)); // Battle Armor/Shell Armor
-        map.put(43,Arrays.asList(43,76)); // Soundproof/Cacophony
-        map.put(13,Arrays.asList(13,77)); // Cloud Nine/Air Lock
+        map.put(Abilities.insomnia, Arrays.asList(Abilities.insomnia, Abilities.vitalSpirit));
+        map.put(Abilities.clearBody, Arrays.asList(Abilities.clearBody, Abilities.whiteSmoke));
+        map.put(Abilities.hugePower, Arrays.asList(Abilities.hugePower, Abilities.purePower));
+        map.put(Abilities.battleArmor, Arrays.asList(Abilities.battleArmor, Abilities.shellArmor));
+        map.put(Abilities.cloudNine, Arrays.asList(Abilities.cloudNine, Gen3Constants.airLockIndex));
 
         return map;
     }
+
+    public static final List<Integer> uselessAbilities = Arrays.asList(Abilities.forecast, Gen3Constants.cacophonyIndex);
 
     public static final int frlgMapLabelsStart = 0x58;
 
@@ -201,6 +201,44 @@ public class Gen3Constants {
     
     public static final int luckyEggIndex = 0xC5;
 
+    // https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_III)
+    // Berries that can be eaten in battle listed. They are in numeric order and roughly categorized.
+    public static final int
+        // status effect berries
+        cheriBerry = 0x85, chestoBerry = 0x86, pechaBerry = 0x87, rawstBerry = 0x88, aspearBerry = 0x89,
+        leppaBerry = 0x8a, oranBerry = 0x8b, persimBerry = 0x8c, lumBerry = 0x8d, sitrusBerry = 0x8e,
+        // Restore 1/8 HP when below 50% but may cause confusion
+        figyBerry = 0x8f, wikiBerry = 0x90, magoBerry = 0x91, aguavBerry = 0x92, iapapaBerry = 0x93,
+        // Increase stat (or other buff) when below 25%
+        liechiBerry = 0xa8, ganlonBerry = 0xa9, salacBerry = 0xaa, petayaBerry = 0xab, apicotBerry = 0xac,
+        lansatBerry = 0xad, starfBerry = 0xae;
+    // Other consumable held items
+    public static final int berryJuice = 0x2c, whiteHerb = 0xb4, mentalHerb = 0xb9;
+    // non-consumable held items with in-battle NPC effect (not specific to one pokemon family)
+    public static final int brightPowder = 0x0b3, quickClaw = 0x0b7, choiceBand = 0x0ba, kingsRock = 0x0bb,
+            silverPowder = 0x0bc, focusBand = 0x0c4, scopeLens = 0x0c6, metalCoat = 0x0c7, leftovers = 0x0c8,
+            softSand = 0x0cb, hardStone = 0x0cc, miracleSeed = 0x0cd, blackGlasses = 0x0ce, blackBelt = 0x0cf,
+            magnet = 0x0d0, mysticWater = 0x0d1, sharpBeak = 0x0d2, poisonBarb = 0x0d3, neverMeltIce = 0x0d4,
+            spellTag = 0x0d5, twistedSpoon = 0x0d6, charcoal = 0x0d7, dragonFang = 0x0d8, silkScarf = 0x0d9,
+            shellBell = 0x0db, seaIncense = 0x0dc, laxIncense = 0x0de;
+
+    public static final List<Integer> consumableHeldItems = Arrays.asList(
+            cheriBerry, chestoBerry, pechaBerry, rawstBerry, aspearBerry, leppaBerry, oranBerry, persimBerry,
+            lumBerry, sitrusBerry, figyBerry, wikiBerry, magoBerry, aguavBerry, iapapaBerry, liechiBerry,
+            ganlonBerry, salacBerry, petayaBerry, apicotBerry, lansatBerry, starfBerry, berryJuice, whiteHerb,
+            mentalHerb);
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Arrays.asList(brightPowder, quickClaw, choiceBand, kingsRock, silverPowder, focusBand,
+                scopeLens, metalCoat, leftovers, softSand, hardStone, miracleSeed, blackGlasses, blackBelt, magnet,
+                mysticWater, sharpBeak, poisonBarb, neverMeltIce, spellTag, twistedSpoon, charcoal, dragonFang,
+                silkScarf, shellBell, seaIncense, laxIncense));
+        list.addAll(consumableHeldItems);
+        return list;
+    }
 
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
@@ -325,14 +363,14 @@ public class Gen3Constants {
         tag(trs, "GYM8", 0x82, 0x266, 0x83, 0x12D, 0x81, 0x74, 0x80, 0x265);
 
         // Gym Leaders
-        tag(trs, 0x109, "GYM1");
-        tag(trs, 0x10A, "GYM2");
-        tag(trs, 0x10B, "GYM3");
-        tag(trs, 0x10C, "GYM4");
-        tag(trs, 0x10D, "GYM5");
-        tag(trs, 0x10E, "GYM6");
-        tag(trs, 0x10F, "GYM7");
-        tag(trs, 0x110, "GYM8");
+        tag(trs, 0x109, "GYM1-LEADER");
+        tag(trs, 0x10A, "GYM2-LEADER");
+        tag(trs, 0x10B, "GYM3-LEADER");
+        tag(trs, 0x10C, "GYM4-LEADER");
+        tag(trs, 0x10D, "GYM5-LEADER");
+        tag(trs, 0x10E, "GYM6-LEADER");
+        tag(trs, 0x10F, "GYM7-LEADER");
+        tag(trs, 0x110, "GYM8-LEADER");
         // Elite 4
         tag(trs, 0x105, "ELITE1");
         tag(trs, 0x106, "ELITE2");
@@ -373,14 +411,17 @@ public class Gen3Constants {
         tag(trs, 0x299, "RIVAL4-0");
         tag(trs, 0x29A, "RIVAL4-1");
 
+        // Wally
+        tag(trs, "THEMED:WALLY-STRONG", 0x207, 0x290, 0x291, 0x292, 0x293, 0x294);
+
         if (romType == RomType_Ruby) {
-            tag(trs, "THEMED:MAXIE", 0x259, 0x25A);
-            tag(trs, "THEMED:COURTNEY", 0x257, 0x258);
-            tag(trs, "THEMED:TABITHA", 0x254, 0x255);
+            tag(trs, "THEMED:MAXIE-LEADER", 0x259, 0x25A);
+            tag(trs, "THEMED:COURTNEY-STRONG", 0x257, 0x258);
+            tag(trs, "THEMED:TABITHA-STRONG", 0x254, 0x255);
         } else {
-            tag(trs, "THEMED:ARCHIE", 0x23, 0x22);
-            tag(trs, "THEMED:MATT", 0x1E, 0x1F);
-            tag(trs, "THEMED:SHELLY", 0x20, 0x21);
+            tag(trs, "THEMED:ARCHIE-LEADER", 0x23, 0x22);
+            tag(trs, "THEMED:MATT-STRONG", 0x1E, 0x1F);
+            tag(trs, "THEMED:SHELLY-STRONG", 0x20, 0x21);
         }
 
     }
@@ -397,14 +438,14 @@ public class Gen3Constants {
         tag(trs, "GYM8", 0x265, 0x80, 0x1F6, 0x73, 0x81, 0x76, 0x82, 0x12D, 0x83, 0x266);
 
         // Gym Leaders + Emerald Rematches!
-        tag(trs, "GYM1", 0x109, 0x302, 0x303, 0x304, 0x305);
-        tag(trs, "GYM2", 0x10A, 0x306, 0x307, 0x308, 0x309);
-        tag(trs, "GYM3", 0x10B, 0x30A, 0x30B, 0x30C, 0x30D);
-        tag(trs, "GYM4", 0x10C, 0x30E, 0x30F, 0x310, 0x311);
-        tag(trs, "GYM5", 0x10D, 0x312, 0x313, 0x314, 0x315);
-        tag(trs, "GYM6", 0x10E, 0x316, 0x317, 0x318, 0x319);
-        tag(trs, "GYM7", 0x10F, 0x31A, 0x31B, 0x31C, 0x31D);
-        tag(trs, "GYM8", 0x110, 0x31E, 0x31F, 0x320, 0x321);
+        tag(trs, "GYM1-LEADER", 0x109, 0x302, 0x303, 0x304, 0x305);
+        tag(trs, "GYM2-LEADER", 0x10A, 0x306, 0x307, 0x308, 0x309);
+        tag(trs, "GYM3-LEADER", 0x10B, 0x30A, 0x30B, 0x30C, 0x30D);
+        tag(trs, "GYM4-LEADER", 0x10C, 0x30E, 0x30F, 0x310, 0x311);
+        tag(trs, "GYM5-LEADER", 0x10D, 0x312, 0x313, 0x314, 0x315);
+        tag(trs, "GYM6-LEADER", 0x10E, 0x316, 0x317, 0x318, 0x319);
+        tag(trs, "GYM7-LEADER", 0x10F, 0x31A, 0x31B, 0x31C, 0x31D);
+        tag(trs, "GYM8-LEADER", 0x110, 0x31E, 0x31F, 0x320, 0x321);
 
         // Elite 4
         tag(trs, 0x105, "ELITE1");
@@ -456,11 +497,12 @@ public class Gen3Constants {
         tag(trs, 0x29A, "RIVAL5-1");
 
         // Themed
-        tag(trs, "THEMED:MAXIE", 0x259, 0x25A, 0x2DE);
-        tag(trs, "THEMED:TABITHA", 0x202, 0x255, 0x2DC);
-        tag(trs, "THEMED:ARCHIE", 0x22);
-        tag(trs, "THEMED:MATT", 0x1E);
-        tag(trs, "THEMED:SHELLY", 0x20, 0x21);
+        tag(trs, "THEMED:MAXIE-LEADER", 0x259, 0x25A, 0x2DE);
+        tag(trs, "THEMED:TABITHA-STRONG", 0x202, 0x255, 0x2DC);
+        tag(trs, "THEMED:ARCHIE-LEADER", 0x22);
+        tag(trs, "THEMED:MATT-STRONG", 0x1E);
+        tag(trs, "THEMED:SHELLY-STRONG", 0x20, 0x21);
+        tag(trs, "THEMED:WALLY-STRONG", 0x207, 0x290, 0x291, 0x292, 0x293, 0x294);
 
         // Steven
         tag(trs, 0x324, "UBER");
@@ -480,18 +522,18 @@ public class Gen3Constants {
         tag(trs, "GYM8", 0x129, 0x143, 0x188, 0x190, 0x142, 0x128, 0x191, 0x144);
 
         // Gym Leaders
-        tag(trs, 0x19E, "GYM1");
-        tag(trs, 0x19F, "GYM2");
-        tag(trs, 0x1A0, "GYM3");
-        tag(trs, 0x1A1, "GYM4");
-        tag(trs, 0x1A2, "GYM5");
-        tag(trs, 0x1A4, "GYM6");
-        tag(trs, 0x1A3, "GYM7");
-        tag(trs, 0x15E, "GYM8");
+        tag(trs, 0x19E, "GYM1-LEADER");
+        tag(trs, 0x19F, "GYM2-LEADER");
+        tag(trs, 0x1A0, "GYM3-LEADER");
+        tag(trs, 0x1A1, "GYM4-LEADER");
+        tag(trs, 0x1A2, "GYM5-LEADER");
+        tag(trs, 0x1A4, "GYM6-LEADER");
+        tag(trs, 0x1A3, "GYM7-LEADER");
+        tag(trs, 0x15E, "GYM8-LEADER");
 
         // Giovanni
-        tag(trs, 0x15C, "GIO1");
-        tag(trs, 0x15D, "GIO2");
+        tag(trs, 0x15C, "GIO1-LEADER");
+        tag(trs, 0x15D, "GIO2-LEADER");
 
         // E4 Round 1
         tag(trs, 0x19A, "ELITE1-1");

@@ -39,6 +39,8 @@ public class Gen5Constants {
     public static final int Type_BW = 0;
     public static final int Type_BW2 = 1;
 
+    public static final int arm9Offset = 0x02004000;
+
     public static final int pokemonCount = 649, moveCount = 559, nonUnovaPokemonCount = 493;
     private static final int bw1FormeCount = 18, bw2FormeCount = 24;
     private static final int bw1formeOffset = 0, bw2formeOffset = 35;
@@ -85,9 +87,16 @@ public class Gen5Constants {
     public static final int w2Route4EncounterFile = 105, w2VRExclusiveRoom1 = 78, w2VRExclusiveRoom2 = 79,
             w2ReversalMountainStart = 55, w2ReversalMountainEnd = 60;
 
-    public static final int[] bw2HiddenHollowUnovaPokemon = { 505, 507, 510, 511, 513, 515, 519, 523, 525, 527, 529,
-            531, 533, 535, 538, 539, 542, 545, 546, 548, 550, 553, 556, 558, 559, 561, 564, 569, 572, 575, 578, 580,
-            583, 587, 588, 594, 596, 601, 605, 607, 610, 613, 616, 618, 619, 621, 622, 624, 626, 628, 630, 631, 632, };
+    public static final List<Integer> bw2HiddenHollowUnovaPokemon = Arrays.asList(Species.watchog, Species.herdier, Species.liepard,
+            Species.pansage, Species.pansear, Species.panpour, Species.pidove, Species.zebstrika, Species.boldore,
+            Species.woobat, Species.drilbur, Species.audino, Species.gurdurr, Species.tympole, Species.throh,
+            Species.sawk, Species.leavanny, Species.scolipede, Species.cottonee, Species.petilil, Species.basculin,
+            Species.krookodile, Species.maractus, Species.crustle, Species.scraggy, Species.sigilyph, Species.tirtouga,
+            Species.garbodor, Species.minccino, Species.gothorita, Species.duosion, Species.ducklett, Species.vanillish,
+            Species.emolga, Species.karrablast, Species.alomomola, Species.galvantula, Species.klinklang, Species.elgyem,
+            Species.litwick, Species.axew, Species.cubchoo, Species.shelmet, Species.stunfisk, Species.mienfoo,
+            Species.druddigon, Species.golett, Species.pawniard, Species.bouffalant, Species.braviary, Species.mandibuzz,
+            Species.heatmor, Species.durant);
 
     public static final String tmDataPrefix = "87038803";
 
@@ -101,8 +110,6 @@ public class Gen5Constants {
 
     public static final int evolutionMethodCount = 27;
 
-    public static final int slowpokeIndex = 79, eeveeIndex = 133, karrablastIndex = 588, shelmetIndex = 616;
-
     public static final int sunStoneIndex = 80, moonStoneIndex = 81, waterStoneIndex = 84;
 
     public static final int highestAbilityIndex = 164;
@@ -114,17 +121,19 @@ public class Gen5Constants {
 
     private static Map<Integer,List<Integer>> setupAbilityVariations() {
         Map<Integer,List<Integer>> map = new HashMap<>();
-        map.put(15,Arrays.asList(15,72)); // Insomnia/Vital Spirit
-        map.put(29,Arrays.asList(29,73)); // Clear Body/White Smoke
-        map.put(37,Arrays.asList(37,74)); // Huge Power/Pure Power
-        map.put(4,Arrays.asList(4,75)); // Battle Armor/Shell Armor
-        map.put(13,Arrays.asList(13,76)); // Cloud Nine/Air Lock
-        map.put(111,Arrays.asList(111,116)); // Filter/Solid Rock
-        map.put(24,Arrays.asList(24,160)); // Rough Skin/Iron Barbs
-        map.put(104,Arrays.asList(104,163,164)); // Mold Breaker/Turboblaze/Teravolt
+        map.put(Abilities.insomnia, Arrays.asList(Abilities.insomnia, Abilities.vitalSpirit));
+        map.put(Abilities.clearBody, Arrays.asList(Abilities.clearBody, Abilities.whiteSmoke));
+        map.put(Abilities.hugePower, Arrays.asList(Abilities.hugePower, Abilities.purePower));
+        map.put(Abilities.battleArmor, Arrays.asList(Abilities.battleArmor, Abilities.shellArmor));
+        map.put(Abilities.cloudNine, Arrays.asList(Abilities.cloudNine, Abilities.airLock));
+        map.put(Abilities.filter, Arrays.asList(Abilities.filter, Abilities.solidRock));
+        map.put(Abilities.roughSkin, Arrays.asList(Abilities.roughSkin, Abilities.ironBarbs));
+        map.put(Abilities.moldBreaker, Arrays.asList(Abilities.moldBreaker, Abilities.turboblaze, Abilities.teravolt));
 
         return map;
     }
+
+    public static final List<Integer> uselessAbilities = Arrays.asList(Abilities.forecast, Abilities.multitype, Abilities.zenMode);
 
     public static final int normalItemSetVarCommand = 0x28, hiddenItemSetVarCommand = 0x2A, normalItemVarSet = 0x800C,
             hiddenItemVarSet = 0x8000;
@@ -330,6 +339,44 @@ public class Gen5Constants {
     private static final int bw1FieldOverlayNumber = 21, bw2FieldOverlayNumber = 36;
     public static final String runningShoesPrefix = "01D0012008BD002008BD63";
 
+    public static final String introGraphicPrefix = "5A0000010000001700000001000000", bw1IntroCryPrefix = "0021009101910291", bw2IntroCryLocator = "3D020000F8B51C1C";
+
+    // https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_V)
+    // Held items we randomize from Gen 5 are a superset of the held items from Gen 4. Thus, we list only the
+    // new ones here.
+    // New consumable held items.
+    public static final int airBalloon = 0x21d, redCard = 0x21e, absorbBulb = 0x221, cellBattery = 0x222,
+            ejectButton = 0x223, fireGem = 0x224, waterGem = 0x225, electricGem = 0x226, grassGem = 0x227,
+            iceGem = 0x228, fightingGem = 0x229, poisonGem = 0x22a, groundGem = 0x22b, flyingGem = 0x22c,
+            psychicGem = 0x22d, bugGem = 0x22e, rockGem = 0x22f, ghostGem = 0x230, dragonGem = 0x231,
+            darkGem = 0x232, steelGem = 0x233, normalGem = 0x234;
+    // New non-consumable held items with in-battle NPC effect (not specific to one pokemon family or one move)
+    public static final int eviolite = 0x21a, floatStone = 0x21b, rockyHelmet = 0x21c, ringTarget = 0x21f,
+            bindingBand = 0x220;
+
+    public static final List<Integer> consumableHeldItems = setupAllConsumableItems();
+
+    private static List<Integer> setupAllConsumableItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Gen4Constants.consumableHeldItems);
+        list.addAll(Arrays.asList(airBalloon, redCard, absorbBulb, cellBattery, ejectButton, fireGem, waterGem,
+                electricGem, grassGem, iceGem, fightingGem, poisonGem, groundGem, flyingGem, psychicGem, bugGem,
+                rockGem, ghostGem, dragonGem, darkGem, steelGem, normalGem));
+        return list;
+    }
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Gen4Constants.allHeldItems);
+        list.addAll(Arrays.asList(airBalloon, redCard, absorbBulb, cellBattery, ejectButton, fireGem, waterGem,
+                electricGem, grassGem, iceGem, fightingGem, poisonGem, groundGem, flyingGem, psychicGem, bugGem,
+                rockGem, ghostGem, dragonGem, darkGem, steelGem, normalGem));
+        list.addAll(Arrays.asList(eviolite, floatStone, rockyHelmet, ringTarget, bindingBand));
+        return list;
+    }
+
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
         table[0x00] = Type.NORMAL;
@@ -527,20 +574,20 @@ public class Gen5Constants {
         deoxysMap.put(1,"-A");
         deoxysMap.put(2,"-D");
         deoxysMap.put(3,"-S");
-        map.put(386,deoxysMap);
+        map.put(Species.deoxys, deoxysMap);
 
         Map<Integer,String> wormadamMap = new HashMap<>();
         wormadamMap.put(1,"-S");
         wormadamMap.put(2,"-T");
-        map.put(413,wormadamMap);
+        map.put(Species.wormadam, wormadamMap);
 
         Map<Integer,String> shayminMap = new HashMap<>();
         shayminMap.put(1,"-S");
-        map.put(492,shayminMap);
+        map.put(Species.shaymin, shayminMap);
 
         Map<Integer,String> giratinaMap = new HashMap<>();
         giratinaMap.put(1,"-O");
-        map.put(487,giratinaMap);
+        map.put(Species.giratina, giratinaMap);
 
         Map<Integer,String> rotomMap = new HashMap<>();
         rotomMap.put(1,"-H");
@@ -548,46 +595,46 @@ public class Gen5Constants {
         rotomMap.put(3,"-Fr");
         rotomMap.put(4,"-Fa");
         rotomMap.put(5,"-M");
-        map.put(479,rotomMap);
+        map.put(Species.rotom, rotomMap);
 
         Map<Integer,String> castformMap = new HashMap<>();
         castformMap.put(1,"-F");
         castformMap.put(2,"-W");
         castformMap.put(3,"-I");
-        map.put(351,castformMap);
+        map.put(Species.castform, castformMap);
 
         Map<Integer,String> basculinMap = new HashMap<>();
         basculinMap.put(1,"-B");
-        map.put(550,basculinMap);
+        map.put(Species.basculin, basculinMap);
 
         Map<Integer,String> darmanitanMap = new HashMap<>();
         darmanitanMap.put(1,"-Z");
-        map.put(555,darmanitanMap);
+        map.put(Species.darmanitan, darmanitanMap);
 
         Map<Integer,String> meloettaMap = new HashMap<>();
         meloettaMap.put(1,"-P");
-        map.put(648,meloettaMap);
+        map.put(Species.meloetta, meloettaMap);
 
         Map<Integer,String> kyuremMap = new HashMap<>();
         kyuremMap.put(1,"-W");
         kyuremMap.put(2,"-B");
-        map.put(646,kyuremMap);
+        map.put(Species.kyurem, kyuremMap);
 
-        Map<Integer,String> keldeoMap = new HashMap<>();
+        Map<Integer,String> keldeoMap = new HashMap();
         keldeoMap.put(1,"-R");
-        map.put(647,keldeoMap);
+        map.put(Species.keldeo, keldeoMap);
 
         Map<Integer,String> tornadusMap = new HashMap<>();
         tornadusMap.put(1,"-T");
-        map.put(641,tornadusMap);
+        map.put(Species.tornadus, tornadusMap);
 
         Map<Integer,String> thundurusMap = new HashMap<>();
         thundurusMap.put(1,"-T");
-        map.put(642,thundurusMap);
+        map.put(Species.thundurus, thundurusMap);
 
         Map<Integer,String> landorusMap = new HashMap<>();
         landorusMap.put(1,"-T");
-        map.put(645,landorusMap);
+        map.put(Species.landorus, landorusMap);
 
         return map;
     }
@@ -606,20 +653,20 @@ public class Gen5Constants {
         deoxysMap.put(1,650);
         deoxysMap.put(2,651);
         deoxysMap.put(3,652);
-        map.put(386,deoxysMap);
+        map.put(Species.deoxys, deoxysMap);
 
         Map<Integer,Integer> wormadamMap = new HashMap<>();
         wormadamMap.put(1,653);
         wormadamMap.put(2,654);
-        map.put(413,wormadamMap);
+        map.put(Species.wormadam, wormadamMap);
 
         Map<Integer,Integer> shayminMap = new HashMap<>();
         shayminMap.put(1,655);
-        map.put(492,shayminMap);
+        map.put(Species.shaymin, shayminMap);
 
         Map<Integer,Integer> giratinaMap = new HashMap<>();
         giratinaMap.put(1,656);
-        map.put(487,giratinaMap);
+        map.put(Species.giratina, giratinaMap);
 
         Map<Integer,Integer> rotomMap = new HashMap<>();
         rotomMap.put(1,657);
@@ -627,46 +674,46 @@ public class Gen5Constants {
         rotomMap.put(3,659);
         rotomMap.put(4,660);
         rotomMap.put(5,661);
-        map.put(479,rotomMap);
+        map.put(Species.rotom, rotomMap);
 
         Map<Integer,Integer> castformMap = new HashMap<>();
         castformMap.put(1,662);
         castformMap.put(2,663);
         castformMap.put(3,664);
-        map.put(351,castformMap);
+        map.put(Species.castform, castformMap);
 
         Map<Integer,Integer> basculinMap = new HashMap<>();
         basculinMap.put(1,665);
-        map.put(550,basculinMap);
+        map.put(Species.basculin, basculinMap);
 
         Map<Integer,Integer> darmanitanMap = new HashMap<>();
         darmanitanMap.put(1,666);
-        map.put(555,darmanitanMap);
+        map.put(Species.darmanitan, darmanitanMap);
 
         Map<Integer,Integer> meloettaMap = new HashMap<>();
         meloettaMap.put(1,667);
-        map.put(648,meloettaMap);
+        map.put(Species.meloetta, meloettaMap);
 
         Map<Integer,Integer> kyuremMap = new HashMap<>();
         kyuremMap.put(1,668);
         kyuremMap.put(2,669);
-        map.put(646,kyuremMap);
+        map.put(Species.kyurem, kyuremMap);
 
         Map<Integer,Integer> keldeoMap = new HashMap<>();
         keldeoMap.put(1,670);
-        map.put(647,keldeoMap);
+        map.put(Species.keldeo, keldeoMap);
 
         Map<Integer,Integer> tornadusMap = new HashMap<>();
         tornadusMap.put(1,671);
-        map.put(641,tornadusMap);
+        map.put(Species.tornadus, tornadusMap);
 
         Map<Integer,Integer> thundurusMap = new HashMap<>();
         thundurusMap.put(1,672);
-        map.put(642,thundurusMap);
+        map.put(Species.thundurus, thundurusMap);
 
         Map<Integer,Integer> landorusMap = new HashMap<>();
         landorusMap.put(1,673);
-        map.put(645,landorusMap);
+        map.put(Species.landorus, landorusMap);
 
         return map;
     }

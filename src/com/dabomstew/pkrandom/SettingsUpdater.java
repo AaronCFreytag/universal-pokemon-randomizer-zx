@@ -189,7 +189,7 @@ public class SettingsUpdater {
                 oldTweaks |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
             }
             if ((dataBlock[2] & (1 << 5)) != 0) {
-                oldTweaks |= MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS.getValue();
+                oldTweaks |= MiscTweak.UNUSED1.getValue();
             }
             FileFunctions.writeFullInt(dataBlock, 27, oldTweaks);
 
@@ -278,6 +278,18 @@ public class SettingsUpdater {
 
             // static level modifier
             insertExtraByte(47, (byte) 50);
+        }
+
+        if (oldVersion < 315) {
+
+            int oldTweaks = FileFunctions.readFullInt(dataBlock, 32);
+
+            oldTweaks &= ~MiscTweak.UNUSED1.getValue();
+
+            FileFunctions.writeFullInt(dataBlock, 32, oldTweaks);
+
+            insertExtraByte(48, (byte) 0);
+
         }
 
         // fix checksum

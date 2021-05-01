@@ -31,6 +31,8 @@ import java.util.ResourceBundle;
 
 public class MiscTweak implements Comparable<MiscTweak> {
 
+    public static final int NO_MISC_TWEAKS = 0;
+
     private static final ResourceBundle bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");
 
     public static List<MiscTweak> allTweaks = new ArrayList<>();
@@ -46,7 +48,7 @@ public class MiscTweak implements Comparable<MiscTweak> {
     public static final MiscTweak ALLOW_PIKACHU_EVOLUTION = new MiscTweak(1 << 6, "pikachuEvo", 0);
     public static final MiscTweak NATIONAL_DEX_AT_START = new MiscTweak(1 << 7, "nationalDex", 0);
     public static final MiscTweak UPDATE_TYPE_EFFECTIVENESS = new MiscTweak(1 << 8, "typeEffectiveness", 0);
-    public static final MiscTweak RANDOMIZE_HIDDEN_HOLLOWS = new MiscTweak(1 << 9, "hiddenHollows", 0);
+    public static final MiscTweak UNUSED1 = new MiscTweak(1 << 9, "unused1", 0);
     public static final MiscTweak LOWER_CASE_POKEMON_NAMES = new MiscTweak(1 << 10, "lowerCaseNames", 0);
     public static final MiscTweak RANDOMIZE_CATCHING_TUTORIAL = new MiscTweak(1 << 11, "catchingTutorial", 0);
     public static final MiscTweak BAN_LUCKY_EGG = new MiscTweak(1 << 12, "luckyEgg", 1);
@@ -56,6 +58,7 @@ public class MiscTweak implements Comparable<MiscTweak> {
     public static final MiscTweak BALANCE_STATIC_LEVELS = new MiscTweak(1 << 16, "balanceStaticLevels",0);
     public static final MiscTweak RETAIN_ALT_FORMES = new MiscTweak(1 << 17, "retainAltFormes",0);
     public static final MiscTweak RUN_WITHOUT_RUNNING_SHOES = new MiscTweak(1 << 18, "runWithoutRunningShoes", 0);
+    public static final MiscTweak FASTER_HP_AND_EXP_BARS = new MiscTweak(1 << 19, "fasterHpAndExpBars", 0);
     /* @formatter:on */
 
     private final int value;

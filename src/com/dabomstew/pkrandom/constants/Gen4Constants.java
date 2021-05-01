@@ -37,6 +37,8 @@ public class Gen4Constants {
     public static final int Type_Plat = 1;
     public static final int Type_HGSS = 2;
 
+    public static final int arm9Offset = 0x02000000;
+
     public static final int pokemonCount = 493, moveCount = 467;
     private static final int dpFormeCount = 5, platHgSsFormeCount = 12;
     public static final int formeOffset = 2;
@@ -45,6 +47,8 @@ public class Gen4Constants {
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGrowthCurveOffset = 19,
             bsAbility1Offset = 22, bsAbility2Offset = 23, bsTMHMCompatOffset = 28;
+
+    public static final String starterCriesPrefix = "0004000C10BD0000000000000000000000E000000000000000E0000000000200";
 
     public static final byte[] hgssStarterCodeSuffix = { 0x03, 0x03, 0x1A, 0x12, 0x1, 0x23, 0x0, 0x0 };
 
@@ -72,9 +76,6 @@ public class Gen4Constants {
 
     public static final int dpStarterStringIndex = 19, ptStarterStringIndex = 36;
 
-    public static final int chikoritaIndex = 152, cyndaquilIndex = 155, totodileIndex = 158, turtwigIndex = 387,
-            chimcharIndex = 390, piplupIndex = 393, slowpokeIndex = 79, eeveeIndex = 133;
-
     public static final int fossilCount = 7;
 
     public static final String dpptTMDataPrefix = "D100D200D300D400", hgssTMDataPrefix = "1E003200";
@@ -94,19 +95,86 @@ public class Gen4Constants {
 
     public static final int highestAbilityIndex = 123;
 
+    // https://projectpokemon.org/home/docs/gen-4/list-of-items-by-index-number-r23/
+    // Berries that can be eaten in battle listed. They are in numeric order and roughly categorized.
+    public static final int
+            // status effect berries
+            cheriBerry = 0x95, chestoBerry = 0x96, pechaBerry = 0x97, rawstBerry = 0x98, aspearBerry = 0x99,
+            leppaBerry = 0x9a, oranBerry = 0x9b, persimBerry = 0x9c, lumBerry = 0x9d, sitrusBerry = 0x9e,
+            // Restore 1/8 HP when below 50% but may cause confusion
+            figyBerry = 0x9f, wikiBerry = 0xa0, magoBerry = 0xa1, aguavBerry = 0xa2, iapapaBerry = 0xa3,
+            // Reduce damage from supereffective damage
+            occaBerry = 0xb8, passhoBerry = 0xb9, wacanBerry = 0xba, rindoBerry = 0xbb, yacheBerry = 0xbc,
+            chopleBerry = 0xbd, kebiaBerry = 0xbe, shucaBerry = 0xbf, cobaBerry = 0xc0, payapaBerry = 0xc1,
+            tangaBerry = 0xc2, chartiBerry = 0xc3, kasibBerry = 0xc4, habanBerry = 0xc5, colburBerry = 0xc6,
+            babiriBerry = 0xc7, chilanBerry = 0xc8,
+            // Increase stat (or other buff) when below 25%
+            liechiBerry = 0xc9, ganlonBerry = 0xca, salacBerry = 0xcb, petayaBerry = 0xcc, apicotBerry = 0xcd,
+            lansatBerry = 0xce, starfBerry = 0xcf, enigmaBerry = 0xd0, micleBerry = 0xd1, custapBerry = 0xd2,
+            // retaliate berries
+            jabocaBerry = 0xd3, rowapBerry = 0xd4;
+    // Other consumable held items
+    public static final int berryJuice = 0x2b, whiteHerb = 0xd6, mentalHerb = 0xdb, powerHerb = 0x10f,
+            focusSash = 0x113;
+    // non-consumable held items with in-battle NPC effect (not specific to one pokemon family)
+    public static final int brightPowder = 0x0d5, quickClaw = 0x0d9, choiceBand = 0x0dc, kingsRock = 0x0dd,
+            silverPowder = 0x0de, focusBand = 0x0e6, scopeLens = 0x0e8, metalCoat = 0x0e9, leftovers = 0x0ea,
+            softSand = 0x0ed, hardStone = 0x0ee, miracleSeed = 0x0ef, blackGlasses = 0x0f0, blackBelt = 0x0f1,
+            magnet = 0x0f2, mysticWater = 0x0f3, sharpBeak = 0x0f4, poisonBarb = 0x0f5, neverMeltIce = 0x0f6,
+            spellTag = 0x0f7, twistedSpoon = 0x0f8, charcoal = 0x0f9, dragonFang = 0x0fa, silkScarf = 0x0fb,
+            shellBell = 0x0fd, seaIncense = 0x0fe, laxIncense = 0x0ff, wideLens = 0x109, muscleBand = 0x10a,
+            wiseGlasses = 0x10b, expertBelt = 0x10c, lightClay = 0x10d, lifeOrb = 0x10e, toxicOrb = 0x110,
+            flameOrb = 0x111, quickPowder = 0x112, zoomLens = 0x114, metronome = 0x115, ironBall = 0x116,
+            laggingTail = 0x117, destinyKnot = 0x118, blackSludge = 0x119, icyRock = 0x11a, smoothRock = 0x11b,
+            heatRock = 0x11c, dampRock = 0x11d, gripClaw = 0x11e, choiceScarf = 0x11f, stickyBarb = 0x120,
+            shedShell = 0x127, bigRoot = 0x128, choiceSpecs = 0x129, flamePlate = 0x12a, splashPlate = 0x12b,
+            zapPlate = 0x12c, meadowPlate = 0x12d, iciclePlate = 0x12e, fistPlate = 0x12f, toxicPlate = 0x130,
+            earthPlate = 0x131, skyPlate = 0x132, mindPlate = 0x133, insectPlate = 0x134, stonePlate = 0x135,
+            spookyPlate = 0x136, dracoPlate = 0x137, dreadPlate = 0x138, ironPlate = 0x139, oddIncense = 0x13a,
+            rockIncense = 0x13b, fullIncense = 0x13c, waveIncense = 0x13d, roseIncense = 0x13e, pureIncense = 0x140,
+            razorClaw = 0x146, razorFang = 0x147;
+
+    public static final List<Integer> consumableHeldItems = Arrays.asList(
+            cheriBerry, chestoBerry, pechaBerry, rawstBerry, aspearBerry, leppaBerry, oranBerry, persimBerry,
+            lumBerry, sitrusBerry, figyBerry, wikiBerry, magoBerry, aguavBerry, iapapaBerry, occaBerry, passhoBerry,
+            wacanBerry, rindoBerry, yacheBerry, chopleBerry, kebiaBerry, shucaBerry, cobaBerry, payapaBerry,
+            tangaBerry, chartiBerry, kasibBerry, habanBerry, colburBerry, babiriBerry, chilanBerry, liechiBerry,
+            ganlonBerry, salacBerry, petayaBerry, apicotBerry, lansatBerry, starfBerry, enigmaBerry, micleBerry,
+             custapBerry, jabocaBerry, rowapBerry, berryJuice, whiteHerb, mentalHerb, powerHerb, focusSash);
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> list = new ArrayList<>();
+        list.addAll(Arrays.asList(brightPowder, quickClaw, choiceBand, kingsRock, silverPowder, focusBand,
+                scopeLens, metalCoat, leftovers, softSand, hardStone, miracleSeed, blackGlasses, blackBelt, magnet,
+                mysticWater, sharpBeak, poisonBarb, neverMeltIce, spellTag, twistedSpoon, charcoal, dragonFang,
+                silkScarf, shellBell, seaIncense, laxIncense, wideLens, muscleBand, wiseGlasses, expertBelt, lightClay,
+                lifeOrb, toxicOrb, flameOrb, quickPowder, zoomLens, metronome, ironBall, laggingTail, destinyKnot,
+                blackSludge, icyRock, smoothRock, heatRock, dampRock, gripClaw, choiceScarf, stickyBarb, shedShell,
+                bigRoot, choiceSpecs, flamePlate, splashPlate, zapPlate, meadowPlate, iciclePlate, fistPlate,
+                toxicPlate, earthPlate, skyPlate, mindPlate, insectPlate, stonePlate, spookyPlate, dracoPlate,
+                dreadPlate, ironPlate, oddIncense, rockIncense, fullIncense, waveIncense, roseIncense, pureIncense,
+                razorClaw, razorFang));
+        list.addAll(consumableHeldItems);
+        return list;
+    }
+
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 
     private static Map<Integer,List<Integer>> setupAbilityVariations() {
         Map<Integer,List<Integer>> map = new HashMap<>();
-        map.put(15,Arrays.asList(15,72)); // Insomnia/Vital Spirit
-        map.put(29,Arrays.asList(29,73)); // Clear Body/White Smoke
-        map.put(37,Arrays.asList(37,74)); // Huge Power/Pure Power
-        map.put(4,Arrays.asList(4,75)); // Battle Armor/Shell Armor
-        map.put(13,Arrays.asList(13,76)); // Cloud Nine/Air Lock
-        map.put(111,Arrays.asList(111,116)); // Filter/Solid Rock
+        map.put(Abilities.insomnia, Arrays.asList(Abilities.insomnia, Abilities.vitalSpirit));
+        map.put(Abilities.clearBody, Arrays.asList(Abilities.clearBody, Abilities.whiteSmoke));
+        map.put(Abilities.hugePower, Arrays.asList(Abilities.hugePower, Abilities.purePower));
+        map.put(Abilities.battleArmor, Arrays.asList(Abilities.battleArmor, Abilities.shellArmor));
+        map.put(Abilities.cloudNine, Arrays.asList(Abilities.cloudNine, Abilities.airLock));
+        map.put(Abilities.filter, Arrays.asList(Abilities.filter, Abilities.solidRock));
 
         return map;
     }
+
+    public static final List<Integer> uselessAbilities = Arrays.asList(Abilities.forecast, Abilities.multitype);
 
     public static final int dpptSetVarScript = 0x28, hgssSetVarScript = 0x29;
 
@@ -269,6 +337,197 @@ public class Gen4Constants {
         return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,baseForme);
     }
 
+    public static final String lyraEthanMarillSpritePrefix = "274E0604C301274E0704E101274E0804";
+
+    public static final List<Integer> hgssBannedOverworldPokemon = Arrays.asList(
+            // Unown alts (to avoid 28x chance of getting Unown)
+            // Too large Pokemon (box legendaries, Steelix, Wailord, Regigigas and Arceus)
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514,
+            515,
+            516,
+            517,
+            518,
+            519,
+            520,
+            521,
+            522,
+            523,
+            524,
+            525,
+            526,
+            527,
+            528,
+            536,
+            537,
+            579,
+            580,
+            651,
+            712,
+            713,
+            714,
+            833,
+            834,
+            836,
+            837,
+            838,
+            845,
+            846,
+            847,
+            848,
+            849,
+            850,
+            851,
+            852,
+            853,
+            854,
+            855,
+            856,
+            857,
+            858,
+            859,
+            860,
+            861,
+            862
+    );
+
+    public static final int convertOverworldSpriteToSpecies(int overworldSpriteID) {
+        int speciesID = overworldSpriteID - 296;
+
+        // Venusaur
+        if (overworldSpriteID >= 300) {
+            speciesID -= 1;
+        }
+
+        // Pikachu
+        if (overworldSpriteID >= 323) {
+            speciesID -= 1;
+        }
+
+        // Meganium
+        if (overworldSpriteID >= 453) {
+            speciesID -= 1;
+        }
+
+        // Pichu
+        if (overworldSpriteID >= 472) {
+            speciesID -= 1;
+        }
+
+        // Unown
+        if (overworldSpriteID >= 528) {
+            speciesID -= 27;
+        } else if (overworldSpriteID > 501) {
+            speciesID -= (overworldSpriteID - 501);
+        }
+
+        // Wobbuffet
+        if (overworldSpriteID >= 530) {
+            speciesID -= 1;
+        }
+
+        // Steelix
+        if (overworldSpriteID >= 537) {
+            speciesID -= 1;
+        }
+
+        // Heracross
+        if (overworldSpriteID >= 544) {
+            speciesID -= 1;
+        }
+
+        // Deoxys
+        if (overworldSpriteID >= 719) {
+            speciesID -= 3;
+        } else if (overworldSpriteID > 716) {
+            speciesID -= (overworldSpriteID - 716);
+        }
+
+        // Burmy
+        if (overworldSpriteID >= 747) {
+            speciesID -= 2;
+        } else if (overworldSpriteID > 745) {
+            speciesID -= (overworldSpriteID - 745);
+        }
+
+        // Wormadam
+        if (overworldSpriteID >= 750) {
+            speciesID -= 2;
+        } else if (overworldSpriteID > 748) {
+            speciesID -= (overworldSpriteID - 748);
+        }
+
+        // Combee
+        if (overworldSpriteID >= 753) {
+            speciesID -= 1;
+        }
+
+        // Shellos
+        if (overworldSpriteID >= 761) {
+            speciesID -= 1;
+        }
+
+        // Gastrodon
+        if (overworldSpriteID >= 763) {
+            speciesID -= 1;
+        }
+
+        // Gible
+        if (overworldSpriteID >= 784) {
+            speciesID -= 1;
+        }
+
+        // Gabite
+        if (overworldSpriteID >= 786) {
+            speciesID -= 1;
+        }
+
+        // Garchomp
+        if (overworldSpriteID >= 788) {
+            speciesID -= 1;
+        }
+
+        // Hippopotas
+        if (overworldSpriteID >= 793) {
+            speciesID -= 1;
+        }
+
+        // Hippowdon
+        if (overworldSpriteID >= 795) {
+            speciesID -= 1;
+        }
+
+        // Rotom
+        if (overworldSpriteID >= 829) {
+            speciesID -= 5;
+        } else if (overworldSpriteID > 824) {
+            speciesID -= (overworldSpriteID - 824);
+        }
+
+        // Giratina
+        if (overworldSpriteID >= 838) {
+            speciesID -= 1;
+        }
+
+        // Arceus
+        if (overworldSpriteID > 845) {
+            speciesID -= (overworldSpriteID - 845);
+        }
+
+        return speciesID;
+    }
+
     // The original slot each of the 20 "alternate" slots is mapped to
     // swarmx2, dayx2, nightx2, pokeradarx4, GBAx10
     // NOTE: in the game data there are 6 fillers between pokeradar and GBA
@@ -334,6 +593,12 @@ public class Gen4Constants {
     public static final String feebasLevelPrefixDPPt = "019813B0F0BD", honeyTreeLevelPrefixDPPt = "F0BDF0B589B0051C0C1C";
 
     private static final String runningShoesCheckPrefixDPPt = "281C0C24", runningShoesCheckPrefixHGSS = "301C0C24";
+
+    public static final String distortionWorldGroundCheckPrefix = "23D849187944C988090409148F44";
+
+    public static final List<String> dpptIntroPrefixes = Arrays.asList("381CF8BDC046", "08B0F8BD");
+
+    public static final String hpBarSpeedPrefix = "0CD106200090", expBarSpeedPrefix = "011C00D101212E6C", bothBarsSpeedPrefix = "70BD90421DDA";
 
     private static final int trophyGardenGrassEncounterIndexDP = 304, trophyGardenGrassEncounterIndexPt = 308;
     private static final List<Integer> marshGrassEncounterIndicesDP = Arrays.asList(76, 82, 88, 94, 100, 102),
@@ -1175,10 +1440,10 @@ public class Gen4Constants {
     private static Map<Integer,Integer> setupCosmeticForms() {
         Map<Integer,Integer> cosmeticForms = new TreeMap<>();
 
-        cosmeticForms.put(201,28);
-        cosmeticForms.put(412,3);
-        cosmeticForms.put(422,2);
-        cosmeticForms.put(423,2);
+        cosmeticForms.put(Species.unown, 28);
+        cosmeticForms.put(Species.burmy, 3);
+        cosmeticForms.put(Species.shellos, 2);
+        cosmeticForms.put(Species.gastrodon, 2);
         return cosmeticForms;
     }
 
@@ -1228,20 +1493,20 @@ public class Gen4Constants {
         deoxysMap.put(1,494);
         deoxysMap.put(2,495);
         deoxysMap.put(3,496);
-        map.put(386,deoxysMap);
+        map.put(Species.deoxys, deoxysMap);
 
         Map<Integer,Integer> wormadamMap = new HashMap<>();
         wormadamMap.put(1,497);
         wormadamMap.put(2,498);
-        map.put(413,wormadamMap);
+        map.put(Species.wormadam, wormadamMap);
 
         Map<Integer,Integer> giratinaMap = new HashMap<>();
         giratinaMap.put(1,499);
-        map.put(487,giratinaMap);
+        map.put(Species.giratina, giratinaMap);
 
         Map<Integer,Integer> shayminMap = new HashMap<>();
         shayminMap.put(1,500);
-        map.put(492,shayminMap);
+        map.put(Species.shaymin, shayminMap);
 
         Map<Integer,Integer> rotomMap = new HashMap<>();
         rotomMap.put(1,501);
@@ -1249,7 +1514,7 @@ public class Gen4Constants {
         rotomMap.put(3,503);
         rotomMap.put(4,504);
         rotomMap.put(5,505);
-        map.put(479,rotomMap);
+        map.put(Species.rotom, rotomMap);
 
         return map;
     }
