@@ -2601,10 +2601,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         boolean changeMoveEvos = !(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
 
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        Set<Evolution> extraEvolutions = new HashSet<>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
-                extraEvolutions.clear();
                 for (Evolution evo : pkmn.evolutionsFrom) {
                     if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
                         // read move
@@ -2646,14 +2644,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                         } else {
                             addEvoUpdateHeldItem(impossibleEvolutionUpdates, evo, itemNames.get(item));
-                            // Replace, for this entry, w/
-                            // Level up w/ Held Item at Day
-                            evo.type = EvolutionType.LEVEL_ITEM_DAY;
-                            // now add an extra evo for
-                            // Level up w/ Held Item at Night
-                            Evolution extraEntry = new Evolution(evo.from, evo.to, true,
-                                    EvolutionType.LEVEL_ITEM_NIGHT, item);
-                            extraEvolutions.add(extraEntry);
+                            // Use placeholder LEVEL_ITEM entry
+                            // This will be split into two real evolutions later
+                            evo.type = EvolutionType.LEVEL_ITEM;
                         }
                     }
                     if (evo.type == EvolutionType.TRADE_SPECIAL) {
@@ -2666,11 +2659,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         addEvoUpdateParty(impossibleEvolutionUpdates, evo, pokes[evo.extraInfo].fullName());
                     }
                     // TBD: Pancham, Sliggoo? Sylveon?
-                }
-
-                pkmn.evolutionsFrom.addAll(extraEvolutions);
-                for (Evolution ev : extraEvolutions) {
-                    ev.to.evolutionsTo.add(ev);
                 }
             }
         }

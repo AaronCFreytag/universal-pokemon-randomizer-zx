@@ -479,6 +479,8 @@ public interface RomHandler {
 
     void randomizeIngameTrades(Settings settings);
 
+    void replacePlaceholderEvolutions();
+
     boolean hasDVs();
 
     int maxTradeNicknameLength();

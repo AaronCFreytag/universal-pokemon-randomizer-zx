@@ -68,6 +68,7 @@ public enum EvolutionType {
     LEVEL_DUSK(-1, -1, -1, -1, -1, -1, 40),
     LEVEL_NIGHT_ULTRA(-1, -1, -1, -1, -1, -1, 41),
     STONE_ULTRA(-1, -1, -1, -1, -1, -1, 42),
+    LEVEL_ITEM(-1, -1, -1, -1, -1, -1, -1),
     NONE(-1, -1, -1, -1, -1, -1, -1);
     /* @formatter:on */
 

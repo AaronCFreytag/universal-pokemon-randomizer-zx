@@ -259,6 +259,8 @@ public class Randomizer {
             romHandler.swapPokemonEvoMethods(pokemonStatSwaps);
         }
 
+        romHandler.replacePlaceholderEvolutions();
+
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
         if (romHandler.canChangeStarters()) {

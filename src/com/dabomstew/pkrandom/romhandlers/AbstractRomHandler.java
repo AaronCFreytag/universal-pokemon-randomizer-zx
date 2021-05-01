@@ -564,6 +564,28 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void replacePlaceholderEvolutions() {
+        List<Pokemon> allPokes = this.getPokemonInclFormes();
+        for (Pokemon pkmn : allPokes) {
+            if (pkmn != null) {
+                for (Evolution evo : pkmn.evolutionsFrom) {
+                    Evolution extraEvo = null;
+                    if (evo.type == EvolutionType.LEVEL_ITEM) {
+                        evo.type = EvolutionType.LEVEL_ITEM_DAY;
+                        extraEvo = new Evolution(evo.from, evo.to, true,
+                                EvolutionType.LEVEL_ITEM_NIGHT, evo.extraInfo);
+                        extraEvo.forme = evo.forme;
+                    }
+                    if (extraEvo != null) {
+                        extraEvo.from.evolutionsFrom.add(extraEvo);
+                        extraEvo.to.evolutionsTo.add(extraEvo);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public void swapPokemonEvoMethods(Map<Pokemon, Pokemon> swapsToMake) {
         Set<Evolution> changedEvos = new TreeSet<>();
         Map<Pokemon, Evolution> evoInfoCache = new HashMap<Pokemon, Evolution>();
